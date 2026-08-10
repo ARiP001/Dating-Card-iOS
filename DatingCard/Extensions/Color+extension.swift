@@ -11,14 +11,14 @@ import Foundation
 // MARK: - Color Palette
 extension Color {
     // Background
-    static let bgPrimary     = Color.backgroundPrimaryBlack   // background utama gelap
+//    static let bgPrimary     = Color.backgroundPrimaryBlack   // background utama gelap
     static let bgCard        = Color(hex: "#1A1A2E")   // background card / button
    
-    static let accentGreen   = Color.brandColorAccentGreen   // hijau olive (judul, icon)
-    static let accentPurple  = Color.brandColorPrimaryPurple   // ungu gelap (button pattern)
+//    static let accentGreen   = Color.brandColorAccentGreen   // hijau olive (judul, icon)
+//    static let accentPurple  = Color.brandColorPrimaryPurple   // ungu gelap (button pattern)
     static let accentYellow  = Color(hex: "#D4B84A")   // kuning BPM label
     
-    static let textPrimary   = Color.textPrimaryWhite
+//    static let textPrimary   = Color.textPrimaryWhite
     static let textSecondary = Color(hex: "#AAAAAA")
     static let textLabel     = Color(hex: "#D4B84A")   // label bpm/time
     
