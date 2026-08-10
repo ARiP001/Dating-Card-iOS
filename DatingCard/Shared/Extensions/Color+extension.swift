@@ -8,22 +8,18 @@
 import SwiftUI
 import Foundation
 
-// MARK: - Color Palette
+// MARK: - Middle-Fidelity Color Palette
 extension Color {
-    // Background
-//    static let bgPrimary     = Color.backgroundPrimaryBlack   // background utama gelap
-    static let bgCard        = Color(hex: "#1A1A2E")   // background card / button
-   
-//    static let accentGreen   = Color.brandColorAccentGreen   // hijau olive (judul, icon)
-//    static let accentPurple  = Color.brandColorPrimaryPurple   // ungu gelap (button pattern)
-    static let accentYellow  = Color(hex: "#D4B84A")   // kuning BPM label
-    
-//    static let textPrimary   = Color.textPrimaryWhite
-    static let textSecondary = Color(hex: "#AAAAAA")
-    static let textLabel     = Color(hex: "#D4B84A")   // label bpm/time
-    
-    static let greenSurface = Color(hex: "#152721")
-    static let redSurface = Color(hex: "#31151F")
+    static let bgPrimary = Color(hex: "#F7F7FA")
+    static let bgCard = Color(hex: "#FFFFFF")
+    static let surfaceSecondary = Color(hex: "#E7E7EB")
+
+    static let accentPrimary = Color(hex: "#85858A")
+
+    static let textPrimary = Color(hex: "#242428")
+    static let textSecondary = Color(hex: "#626269")
+
+    static let border = Color(hex: "#C7C7CD")
 }
 
 // MARK: - Hex Color Helper
