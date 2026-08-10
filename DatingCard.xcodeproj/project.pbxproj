@@ -6,19 +6,86 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		5E9944AC302A2A61002CE84E /* SelectPreferencesClip.app in Embed App Clips */ = {isa = PBXBuildFile; fileRef = 5E9944A0302A2A60002CE84E /* SelectPreferencesClip.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		5E9944AA302A2A61002CE84E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5EBC9C9B3029A78E009094B5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5E99449F302A2A60002CE84E;
+			remoteInfo = SelectPreferencesClip;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		5E99449B302A2A36002CE84E /* Embed App Clips */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/AppClips";
+			dstSubfolderSpec = 16;
+			files = (
+				5E9944AC302A2A61002CE84E /* SelectPreferencesClip.app in Embed App Clips */,
+			);
+			name = "Embed App Clips";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		5E9944A0302A2A60002CE84E /* SelectPreferencesClip.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SelectPreferencesClip.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5EBC9CA33029A78E009094B5 /* DatingCard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DatingCard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		5E9944AD302A2A61002CE84E /* Exceptions for "SelectPreferencesClip" folder in "SelectPreferencesClip" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 5E99449F302A2A60002CE84E /* SelectPreferencesClip */;
+		};
+		5E9944DB302A3530002CE84E /* Exceptions for "DatingCard" folder in "SelectPreferencesClip" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Features/ChoosePreferences/AppClip/Core/ConversationSession.swift,
+				Features/ChoosePreferences/AppClip/Core/ConversationTopic.swift,
+				Features/ChoosePreferences/AppClip/Core/SessionService.swift,
+				Features/ChoosePreferences/AppClip/Core/SupabaseConfiguration.swift,
+			);
+			target = 5E99449F302A2A60002CE84E /* SelectPreferencesClip */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		5E9944A1302A2A60002CE84E /* SelectPreferencesClip */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				5E9944AD302A2A61002CE84E /* Exceptions for "SelectPreferencesClip" folder in "SelectPreferencesClip" target */,
+			);
+			path = SelectPreferencesClip;
+			sourceTree = "<group>";
+		};
 		5EBC9CA53029A78E009094B5 /* DatingCard */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				5E9944DB302A3530002CE84E /* Exceptions for "DatingCard" folder in "SelectPreferencesClip" target */,
+			);
 			path = DatingCard;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		5E99449D302A2A60002CE84E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		5EBC9CA03029A78E009094B5 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -33,6 +100,7 @@
 			isa = PBXGroup;
 			children = (
 				5EBC9CA53029A78E009094B5 /* DatingCard */,
+				5E9944A1302A2A60002CE84E /* SelectPreferencesClip */,
 				5EBC9CA43029A78E009094B5 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +109,7 @@
 			isa = PBXGroup;
 			children = (
 				5EBC9CA33029A78E009094B5 /* DatingCard.app */,
+				5E9944A0302A2A60002CE84E /* SelectPreferencesClip.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,6 +117,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		5E99449F302A2A60002CE84E /* SelectPreferencesClip */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5E9944AE302A2A61002CE84E /* Build configuration list for PBXNativeTarget "SelectPreferencesClip" */;
+			buildPhases = (
+				5E99449C302A2A60002CE84E /* Sources */,
+				5E99449D302A2A60002CE84E /* Frameworks */,
+				5E99449E302A2A60002CE84E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				5E9944A1302A2A60002CE84E /* SelectPreferencesClip */,
+			);
+			name = SelectPreferencesClip;
+			packageProductDependencies = (
+			);
+			productName = SelectPreferencesClip;
+			productReference = 5E9944A0302A2A60002CE84E /* SelectPreferencesClip.app */;
+			productType = "com.apple.product-type.application.on-demand-install-capable";
+		};
 		5EBC9CA23029A78E009094B5 /* DatingCard */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 5EBC9CAE3029A78F009094B5 /* Build configuration list for PBXNativeTarget "DatingCard" */;
@@ -55,10 +146,12 @@
 				5EBC9C9F3029A78E009094B5 /* Sources */,
 				5EBC9CA03029A78E009094B5 /* Frameworks */,
 				5EBC9CA13029A78E009094B5 /* Resources */,
+				5E99449B302A2A36002CE84E /* Embed App Clips */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				5E9944AB302A2A61002CE84E /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				5EBC9CA53029A78E009094B5 /* DatingCard */,
@@ -80,6 +173,9 @@
 				LastSwiftUpdateCheck = 2660;
 				LastUpgradeCheck = 2660;
 				TargetAttributes = {
+					5E99449F302A2A60002CE84E = {
+						CreatedOnToolsVersion = 26.6;
+					};
 					5EBC9CA23029A78E009094B5 = {
 						CreatedOnToolsVersion = 26.6;
 					};
@@ -100,11 +196,19 @@
 			projectRoot = "";
 			targets = (
 				5EBC9CA23029A78E009094B5 /* DatingCard */,
+				5E99449F302A2A60002CE84E /* SelectPreferencesClip */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		5E99449E302A2A60002CE84E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		5EBC9CA13029A78E009094B5 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -115,6 +219,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		5E99449C302A2A60002CE84E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		5EBC9C9F3029A78E009094B5 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -124,7 +235,85 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		5E9944AB302A2A61002CE84E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5E99449F302A2A60002CE84E /* SelectPreferencesClip */;
+			targetProxy = 5E9944AA302A2A61002CE84E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		5E9944AF302A2A61002CE84E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = SelectPreferencesClip/SelectPreferencesClip.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YC8SS4YRCV;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SelectPreferencesClip/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = DatingCard;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = appldev.DatingCard.Clip;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		5E9944B0302A2A61002CE84E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = SelectPreferencesClip/SelectPreferencesClip.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YC8SS4YRCV;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SelectPreferencesClip/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = DatingCard;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = appldev.DatingCard.Clip;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		5EBC9CAC3029A78F009094B5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -313,6 +502,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		5E9944AE302A2A61002CE84E /* Build configuration list for PBXNativeTarget "SelectPreferencesClip" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5E9944AF302A2A61002CE84E /* Debug */,
+				5E9944B0302A2A61002CE84E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		5EBC9C9E3029A78E009094B5 /* Build configuration list for PBXProject "DatingCard" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

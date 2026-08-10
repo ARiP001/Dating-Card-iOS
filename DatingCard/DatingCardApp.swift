@@ -12,7 +12,8 @@ import SwiftData
 struct DatingCardApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+//            ContentView()
+            PreferenceChooseContentView()
         }
         .modelContainer(for: [
                   CardModel.self,
