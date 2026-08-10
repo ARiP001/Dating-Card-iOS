@@ -10,13 +10,13 @@ import SwiftData
 @Model
 final class CardModel {
     var id: UUID
-    var topicID: String
+    var topicID: Int
     var question: String
     var isPicked: Bool
 
     init(
         id: UUID = UUID(),
-        topicID: String,
+        topicID: Int,
         question: String,
         isPicked: Bool = false
     ) {

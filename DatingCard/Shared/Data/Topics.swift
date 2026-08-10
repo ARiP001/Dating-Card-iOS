@@ -7,35 +7,35 @@
 
 enum Topics {
     static let all: [TopicModel] = [
-        TopicModel(id: "about_me", name: "About Me"),
-        TopicModel(id: "things_i_love", name: "Things I Love"),
-        TopicModel(id: "growing_up", name: "Growing Up"),
-        TopicModel(id: "family_life", name: "Family Life"),
-        TopicModel(id: "my_people", name: "My People"),
+        TopicModel(id: 1, name: "About Me"),
+        TopicModel(id: 2, name: "Things I Love"),
+        TopicModel(id: 3, name: "Growing Up"),
+        TopicModel(id: 4, name: "Family Life"),
+        TopicModel(id: 5, name: "My People"),
 
-        TopicModel(id: "daily_life", name: "Daily Life"),
-        TopicModel(id: "social_energy", name: "Social Energy"),
-        TopicModel(id: "money_priorities", name: "Money & Priorities"),
-        TopicModel(id: "work_ambition", name: "Work & Ambition"),
+        TopicModel(id: 6, name: "Daily Life"),
+        TopicModel(id: 7, name: "Social Energy"),
+        TopicModel(id: 8, name: "Money & Priorities"),
+        TopicModel(id: 9, name: "Work & Ambition"),
 
-        TopicModel(id: "what_matters_to_me", name: "What Matters To Me"),
-        TopicModel(id: "right_wrong", name: "Right & Wrong"),
-        TopicModel(id: "success_meaning", name: "Success & Meaning"),
-        TopicModel(id: "faith_meaning", name: "Faith & Meaning"),
+        TopicModel(id: 10, name: "What Matters To Me"),
+        TopicModel(id: 11, name: "Right & Wrong"),
+        TopicModel(id: 12, name: "Success & Meaning"),
+        TopicModel(id: 13, name: "Faith & Meaning"),
 
-        TopicModel(id: "dating_mindset", name: "Dating Mindset"),
-        TopicModel(id: "love_dating", name: "Love & Dating"),
-        TopicModel(id: "communication", name: "Communication"),
-        TopicModel(id: "quality_time", name: "Quality Time"),
-        TopicModel(id: "love_in_the_future", name: "Love In The Future"),
+        TopicModel(id: 14, name: "Dating Mindset"),
+        TopicModel(id: 15, name: "Love & Dating"),
+        TopicModel(id: 16, name: "Communication"),
+        TopicModel(id: 17, name: "Quality Time"),
+        TopicModel(id: 18, name: "Love In The Future"),
 
-        TopicModel(id: "feelings", name: "Feelings"),
-        TopicModel(id: "emotional_safety", name: "Emotional Safety"),
-        TopicModel(id: "stress_bad_days", name: "Stress & Bad Days"),
-        TopicModel(id: "conflict_repair", name: "Conflict & Repair"),
-        TopicModel(id: "hidden_sides", name: "Hidden Sides"),
+        TopicModel(id: 19, name: "Feelings"),
+        TopicModel(id: 20, name: "Emotional Safety"),
+        TopicModel(id: 21, name: "Stress & Bad Days"),
+        TopicModel(id: 22, name: "Conflict & Repair"),
+        TopicModel(id: 23, name: "Hidden Sides"),
 
-        TopicModel(id: "future_me", name: "Future Me"),
-        TopicModel(id: "dream_life", name: "Dream Life")
+        TopicModel(id: 24, name: "Future Me"),
+        TopicModel(id: 25, name: "Dream Life")
     ]
 }

@@ -6,6 +6,6 @@
 //
 
 struct TopicModel: Identifiable, Hashable {
-    let id: String
+    let id: Int
     let name: String
 }

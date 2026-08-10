@@ -20,10 +20,16 @@ struct ContentView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(card.question)
                         .font(.headline)
-
-                    Text(card.topicID)
+                    HStack {
+                        Text(
+                            Topics.all.first { $0.id == card.topicID }?.name ?? "Unknown Topic"
+                        )
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                        Text("(\(card.topicID))")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
 
                     Text("Picked: \(card.isPicked ? "Yes" : "No")")
                         .font(.caption)
