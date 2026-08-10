@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct DatingCardApp: App {
@@ -13,5 +14,9 @@ struct DatingCardApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: [
+                  CardModel.self,
+                  SessionModel.self
+              ])
     }
 }
