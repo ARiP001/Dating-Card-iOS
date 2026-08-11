@@ -38,7 +38,7 @@ struct AppButton: View {
     }
 
     private var foregroundColor: Color {
-        variant == .primary ? .bgCard : .textPrimary
+        variant == .primary ? .bgCard : .accentPrimary
     }
 
     private var backgroundColor: Color {

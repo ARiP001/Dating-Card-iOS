@@ -28,7 +28,7 @@ struct QRPreferencesChooseView: View {
                     }
                 }
                 .padding(.horizontal, Spacing.xl)
-                .padding(.top, Spacing.xxl)
+//                .padding(.top, Spacing.xxl)
                 .padding(.bottom, Spacing.lg)
             }
             .scrollBounceBehavior(.basedOnSize)

@@ -96,8 +96,10 @@ private struct HistorySessionDetailView: View {
                     QuestionCard(question: card.question)
                 }
             }
-            .padding(.horizontal, Spacing.xs)
+            .scrollTargetLayout()
         }
+        .contentMargins(.horizontal, Spacing.xs, for: .scrollContent)
+        .scrollTargetBehavior(.viewAligned(limitBehavior: .always))
     }
 
     private var details: some View {
