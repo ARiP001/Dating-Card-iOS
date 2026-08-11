@@ -3,7 +3,6 @@
 //  DatingCard
 //
 //  Created by Made Vidyatma Adhi Krisna on 10/08/26.
-//
 
 import Foundation
 import SwiftData
@@ -13,27 +12,32 @@ final class SessionModel {
     var id: UUID
     var isContinue: Bool
 
+    // All topics originally selected for this session (unchanged)
+    var selectedTopicIDs: [Int]
+
+    // Topics that are still waiting to be played (a topic removed after all 5 question cards in its pack have been completed)
+    var currentTopicIDs: [Int]
+
     @Relationship
     var pickedCards: [CardModel]
-
-    @Relationship
-    var currentPackCards: [CardModel]
-
-    var lastTopicID: String?
+    
+    var lastTopicID: Int?
     var lastIndex: Int?
 
     init(
         id: UUID = UUID(),
         isContinue: Bool = false,
+        selectedTopicIDs: [Int] = [],
+        currentTopicIDs: [Int] = [],
         pickedCards: [CardModel] = [],
-        currentPackCards: [CardModel] = [],
-        lastTopicID: String? = nil,
+        lastTopicID: Int? = nil,
         lastIndex: Int? = nil
     ) {
         self.id = id
         self.isContinue = isContinue
+        self.selectedTopicIDs = selectedTopicIDs
+        self.currentTopicIDs = currentTopicIDs
         self.pickedCards = pickedCards
-        self.currentPackCards = currentPackCards
         self.lastTopicID = lastTopicID
         self.lastIndex = lastIndex
     }

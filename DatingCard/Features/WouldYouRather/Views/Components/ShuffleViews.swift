@@ -3,6 +3,7 @@ import SwiftUI
 struct OneByOneShuffleView: View {
     let shuffleStep: Int
     let isReversing: Bool
+    var topicIDs: [Int] = Topics.all.map(\.id).shuffled()
 
     private let cardCount = 8
     private let cardWidth: CGFloat = 132
@@ -19,7 +20,7 @@ struct OneByOneShuffleView: View {
                     let hasArrived = shuffleStep > index
                     let isCurrent = shuffleStep == index
 
-                    SingleShuffleCard()
+                    SingleShuffleCard(topicID: topicID(for: index, offset: 0))
                         .offset(
                             x: topCardX(index: index, width: width, hasArrived: hasArrived),
                             y: topCardY(index: index, height: height, hasArrived: hasArrived)
@@ -30,7 +31,7 @@ struct OneByOneShuffleView: View {
                         .zIndex(cardZIndex(index: index, isBottomCard: false))
                         .animation(.spring(response: 0.5, dampingFraction: 0.74), value: shuffleStep)
 
-                    SingleShuffleCard()
+                    SingleShuffleCard(topicID: topicID(for: index, offset: cardCount))
                         .offset(
                             x: bottomCardX(index: index, width: width, hasArrived: hasArrived),
                             y: bottomCardY(index: index, height: height, hasArrived: hasArrived)
@@ -102,26 +103,25 @@ struct OneByOneShuffleView: View {
 
         return Double(index * 2 + (isBottomCard ? 1 : 0))
     }
+
+    private func topicID(for index: Int, offset: Int) -> Int {
+        guard !topicIDs.isEmpty else { return 1 }
+
+        return topicIDs[(index + offset) % topicIDs.count]
+    }
 }
 
 struct SingleShuffleCard: View {
+    let topicID: Int
+
     var body: some View {
-        RoundedRectangle(cornerRadius: 18)
-            .fill(
-                LinearGradient(
-                    colors: [
-                        Color(.systemGray5),
-                        Color(.systemGray6)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
-            .frame(width: 132, height: 186)
-            .overlay {
-                RoundedRectangle(cornerRadius: 18)
-                    .stroke(Color(.systemGray3).opacity(0.45), lineWidth: 1)
-            }
+        QuestionCard(
+            question: "",
+            topicID: topicID,
+            showsQuestion: false,
+            width: 132,
+            height: 186
+        )
             .shadow(color: .black.opacity(0.14), radius: 12, x: 0, y: 8)
     }
 }
@@ -132,20 +132,13 @@ struct MiniSpinningCard: View {
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 14)
-                .fill(card.color)
-
-            RoundedRectangle(cornerRadius: 14)
-                .stroke(.white.opacity(0.55), lineWidth: 2)
-
-            VStack(spacing: 8) {
-                Image(systemName: card.symbol)
-                    .font(.title2.bold())
-
-                Text(card.title)
-                    .font(.caption.bold())
-            }
-            .foregroundStyle(.white)
+            QuestionCard(
+                question: "",
+                topicID: card.topicID ?? 1,
+                showsQuestion: false,
+                width: 78,
+                height: 110
+            )
 
             if isSelected {
                 RoundedRectangle(cornerRadius: 14)
@@ -153,7 +146,6 @@ struct MiniSpinningCard: View {
                     .shadow(color: .yellow.opacity(0.8), radius: 14)
             }
         }
-        .frame(width: 78, height: 110)
         .shadow(
             color: .black.opacity(isSelected ? 0.28 : 0.16),
             radius: isSelected ? 14 : 8,
