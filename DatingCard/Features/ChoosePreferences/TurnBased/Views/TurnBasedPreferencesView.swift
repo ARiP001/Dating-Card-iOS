@@ -15,7 +15,7 @@ struct TurnBasedPreferencesView: View {
             case .user:
                 return "Sesi kamu"
             case .partner:
-                return "Sesi lawan bicaramu"
+                return "Sesi partnermu"
             }
         }
 
