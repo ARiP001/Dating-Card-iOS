@@ -6,12 +6,18 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct DatingCardApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+//            ContentView()
+            PreferenceChooseContentView()
         }
+        .modelContainer(for: [
+                  CardModel.self,
+                  SessionModel.self
+              ])
     }
 }
