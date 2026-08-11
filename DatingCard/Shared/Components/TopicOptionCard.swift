@@ -7,8 +7,11 @@ import SwiftUI
 
 struct TopicOptionCard<Value: Hashable>: View {
     let title: String
-    let icon: Image
     let value: Value
+    var icon: Image?
+    var topicID: Int?
+    var width: CGFloat = 250
+    var height: CGFloat = 300
     @Binding var selection: Value?
 
     var body: some View {
@@ -16,32 +19,59 @@ struct TopicOptionCard<Value: Hashable>: View {
             selection = value
         } label: {
             VStack(spacing: Spacing.md) {
-                icon
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 44, height: 44)
-                    .foregroundStyle(foregroundColor)
+                if let icon {
+                    icon
+                        .resizable()
+                        .scaledToFit()
+                        .frame(
+                            width: 44,
+                            height: 44
+                        )
+                        .foregroundStyle(
+                            foregroundColor
+                        )
+                }
 
                 Text(title)
                     .font(AppFont.bodyBold)
-                    .foregroundStyle(foregroundColor)
+                    .foregroundStyle(
+                        foregroundColor
+                    )
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
             }
             .padding(Spacing.md)
-            .frame(width: 250, height: 300)
+            .frame(
+                maxWidth: width == .infinity
+                    ? .infinity
+                    : width
+            )
+            .frame(height: height)
             .background(backgroundColor)
-            .clipShape(RoundedRectangle(cornerRadius: Radius.sm))
+            .clipShape(
+                RoundedRectangle(
+                    cornerRadius: Radius.sm
+                )
+            )
             .overlay {
                 RoundedRectangle(cornerRadius: Radius.sm)
-                    .stroke(borderColor, lineWidth: 1)
+                    .stroke(
+                        borderColor,
+                        lineWidth: isSelected ? 4 : 2
+                    )
             }
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(title)
-        .accessibilityValue(isSelected ? "Dipilih" : "Belum dipilih")
-        .accessibilityHint("Pilih topik untuk dibahas lebih dulu")
+        .accessibilityValue(
+            isSelected
+                ? "Dipilih"
+                : "Belum dipilih"
+        )
+        .accessibilityHint(
+            "Pilih topik untuk dibahas lebih dulu"
+        )
     }
 
     private var isSelected: Bool {
@@ -49,15 +79,38 @@ struct TopicOptionCard<Value: Hashable>: View {
     }
 
     private var foregroundColor: Color {
-        isSelected ? .bgCard : .textPrimary
+        isSelected
+            ? .bgCard
+            : .textPrimary
     }
 
     private var backgroundColor: Color {
-        isSelected ? .accentPrimary : .bgCard
+        guard let topicID else {
+            return isSelected
+                ? .accentPrimary
+                : .bgCard
+        }
+
+        return isSelected
+            ? Color.topicColor(
+                for: topicID
+            )
+            : Color.topicColor(
+                for: topicID
+            )
+            .opacity(0.32)
     }
 
     private var borderColor: Color {
-        isSelected ? .accentPrimary : .border
+        guard let topicID else {
+            return isSelected
+                ? .accentPrimary
+                : .border
+        }
+
+        return Color.topicColor(
+            for: topicID
+        )
     }
 }
 
@@ -67,15 +120,19 @@ struct TopicOptionCard<Value: Hashable>: View {
     VStack(spacing: Spacing.md) {
         TopicOptionCard(
             title: "Tentang Diriku",
-            icon: Image(systemName: "person.fill"),
             value: "about-me",
+            icon: Image(systemName: "person.fill"),
+            topicID: 1,
             selection: $selection
         )
 
         TopicOptionCard(
             title: "Isi Pikiran",
-            icon: Image(systemName: "brain.head.profile"),
             value: "thoughts",
+            icon: Image(
+                systemName: "brain.head.profile"
+            ),
+            topicID: 10,
             selection: $selection
         )
     }
