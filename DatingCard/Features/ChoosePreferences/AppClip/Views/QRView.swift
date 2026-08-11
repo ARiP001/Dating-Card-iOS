@@ -6,9 +6,8 @@
 import SwiftUI
 
 struct QRView: View {
-    private enum FlowStep {
+    private enum FlowStep: Equatable {
         case preferences
-        case hatedTopics
         case waitingForPartner
     }
 
@@ -17,13 +16,12 @@ struct QRView: View {
     @State private var selectedTopicIDs: Set<Int> = []
     @State private var hatedTopicIDs: Set<Int> = []
     @State private var flowStep: FlowStep = .preferences
-
-    var onClose: () -> Void = { }
-    var onPreferencesCompleted: (Set<Int>, Set<Int>) -> Void = { _, _ in }
+    @State private var isShowingHatedTopics = false
+    @State private var hasPrintedCombinedPreferences = false
 
     var body: some View {
         Group {
-            if viewModel.state == .completed {
+            if shouldShowCompletedContent {
                 completedContent
                     .transition(.opacity)
             } else if partnerHasJoined {
@@ -35,21 +33,46 @@ struct QRView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: partnerHasJoined)
+        .animation(
+            .easeInOut(duration: 0.25),
+            value: shouldShowCompletedContent
+        )
         .background(Color.bgPrimary.ignoresSafeArea())
         .task {
             if viewModel.sessionID == nil {
                 await viewModel.createNewSession()
             }
         }
+        .onChange(of: viewModel.state) {
+            printCombinedPreferencesIfNeeded()
+        }
+        .onChange(of: flowStep) {
+            printCombinedPreferencesIfNeeded()
+        }
+        .navigationDestination(isPresented: $isShowingHatedTopics) {
+            QRHatedChooseView(
+                selectedTopicIDs: selectedTopicIDs,
+                hatedTopicIDs: $hatedTopicIDs,
+                onSubmit: showWaitingState
+            )
+        }
     }
 
     private var partnerHasJoined: Bool {
         switch viewModel.state {
-        case .joined:
+        case .joined, .completed:
             return true
         default:
             return false
         }
+    }
+
+    private var hostHasCompletedPreferences: Bool {
+        flowStep == .waitingForPartner
+    }
+
+    private var shouldShowCompletedContent: Bool {
+        viewModel.state == .completed && hostHasCompletedPreferences
     }
 
     @ViewBuilder
@@ -60,19 +83,7 @@ struct QRView: View {
                 selectedTopicIDs: $selectedTopicIDs,
                 onContinue: {
                     hatedTopicIDs.subtract(selectedTopicIDs)
-                    flowStep = .hatedTopics
-                }
-            )
-
-        case .hatedTopics:
-            QRHatedChooseView(
-                selectedTopicIDs: selectedTopicIDs,
-                hatedTopicIDs: $hatedTopicIDs,
-                onBack: {
-                    flowStep = .preferences
-                },
-                onSubmit: {
-                    showWaitingState()
+                    isShowingHatedTopics = true
                 }
             )
 
@@ -85,50 +96,34 @@ struct QRView: View {
 
     @ViewBuilder
     private var completedContent: some View {
-        SessionInstructionView(
-            message: "Letakkan HP di tempat yang\ndapat kalian berdua lihat bersama",
-            buttonTitle: "Mulai"
-        ) {
-            onPreferencesCompleted(
-                selectedTopicIDs,
-                hatedTopicIDs
-            )
-        }
+        WouldYouRatherView(topicIDs: combinedTopicIDs)
     }
 
     private var qrContent: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .topTrailing) {
-                VStack(spacing: Spacing.xl) {
-                    Spacer(minLength: geometry.size.height * 0.14)
+        VStack(spacing: Spacing.xl) {
+//            Spacer()
 
-                    VStack(spacing: Spacing.sm) {
-                        Text("Pindai Kode QR\nuntuk Bermain Bersama")
-                            .font(AppFont.title2Bold)
-                            .foregroundStyle(Color.textPrimary)
-                            .multilineTextAlignment(.center)
+            VStack(spacing: Spacing.sm) {
+                Text("Pindai Kode QR\nuntuk Bermain Bersama")
+                    .font(AppFont.title2Bold)
+                    .foregroundStyle(Color.textPrimary)
+                    .multilineTextAlignment(.center)
 
-                        Text(
-                            "Mulai dengan memilih topik yang ingin kalian jelajahi bersama."
-                        )
-                        .font(AppFont.bodyRegular)
-                        .foregroundStyle(Color.textSecondary)
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
-                    }
-
-                    stateContent
-
-                    Spacer()
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .padding(.horizontal, Spacing.xl)
-
-                closeButton
-                    .padding(.top, Spacing.md)
-                    .padding(.trailing, Spacing.lg)
+                Text(
+                    "Mulai dengan memilih topik yang ingin kalian jelajahi bersama."
+                )
+                .font(AppFont.bodyRegular)
+                .foregroundStyle(Color.textSecondary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
             }
+
+            stateContent
+
+            Spacer()
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.horizontal, Spacing.xl)
     }
 
     @ViewBuilder
@@ -187,28 +182,47 @@ struct QRView: View {
         }
     }
 
-    private var closeButton: some View {
-        Button {
-            viewModel.stopPolling()
-            onClose()
-        } label: {
-            Image(systemName: "xmark")
-                .font(.title2.weight(.medium))
-                .foregroundStyle(Color.textPrimary)
-                .frame(width: 44, height: 44)
-                .background(Color.bgCard)
-                .clipShape(Circle())
-                .overlay {
-                    Circle()
-                        .stroke(Color.border, lineWidth: 1)
-                }
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Tutup")
+    private func showWaitingState() {
+        isShowingHatedTopics = false
+        flowStep = .waitingForPartner
     }
 
-    private func showWaitingState() {
-        flowStep = .waitingForPartner
+    private func printCombinedPreferencesIfNeeded() {
+        guard viewModel.state == .completed,
+              hostHasCompletedPreferences,
+              !hasPrintedCombinedPreferences else {
+            return
+        }
+
+        hasPrintedCombinedPreferences = true
+
+        let availableTopics = Topics.all
+            .filter { combinedTopicIDs.contains($0.id) }
+            .map { "\($0.id): \($0.name)" }
+
+        let output = availableTopics.isEmpty
+            ? "Tidak ada topik yang tersedia"
+            : availableTopics.joined(separator: ", ")
+
+        print("AppClip combined preferences: [\(output)]")
+    }
+
+    private var combinedTopicIDs: [Int] {
+        let partnerSelectedTopicIDs = Set(
+            viewModel.receivedSelectedTopicIDs
+        )
+        let partnerHatedTopicIDs = Set(
+            viewModel.receivedHatedTopicIDs
+        )
+        let selectedIDs = selectedTopicIDs
+            .union(partnerSelectedTopicIDs)
+        let hatedIDs = hatedTopicIDs
+            .union(partnerHatedTopicIDs)
+        let availableIDs = selectedIDs.subtracting(hatedIDs)
+
+        return Topics.all.compactMap { topic in
+            availableIDs.contains(topic.id) ? topic.id : nil
+        }
     }
 }
 

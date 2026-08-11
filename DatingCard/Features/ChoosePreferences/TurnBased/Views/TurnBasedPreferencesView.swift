@@ -31,26 +31,18 @@ struct TurnBasedPreferencesView: View {
 
     private enum Step: Equatable {
         case preferences
-        case hatedTopics
-        case putDownPhone
+        case wouldYouRather
     }
 
     @State private var turn: Turn = .user
     @State private var step: Step = .preferences
     @State private var alertTurn: Turn? = .user
+    @State private var isShowingHatedTopics = false
 
     @State private var userSelectedTopicIDs: Set<Int> = []
     @State private var userHatedTopicIDs: Set<Int> = []
     @State private var partnerSelectedTopicIDs: Set<Int> = []
     @State private var partnerHatedTopicIDs: Set<Int> = []
-
-    var onClose: () -> Void = { }
-    var onCompleted: (
-        _ userSelectedTopicIDs: Set<Int>,
-        _ userHatedTopicIDs: Set<Int>,
-        _ partnerSelectedTopicIDs: Set<Int>,
-        _ partnerHatedTopicIDs: Set<Int>
-    ) -> Void = { _, _, _, _ in }
 
     var body: some View {
         ZStack {
@@ -76,6 +68,13 @@ struct TurnBasedPreferencesView: View {
         }
         .animation(.easeInOut(duration: 0.2), value: step)
         .animation(.easeInOut(duration: 0.2), value: alertTurn != nil)
+        .navigationDestination(isPresented: $isShowingHatedTopics) {
+            TurnBasedHatedChooseView(
+                selectedTopicIDs: currentSelectedTopicIDs.wrappedValue,
+                hatedTopicIDs: currentHatedTopicIDs,
+                onSubmit: finishCurrentTurn
+            )
+        }
     }
 
     @ViewBuilder
@@ -84,32 +83,11 @@ struct TurnBasedPreferencesView: View {
         case .preferences:
             TurnBasedPreferencesChooseView(
                 selectedTopicIDs: currentSelectedTopicIDs,
-                onClose: onClose,
                 onContinue: showHatedTopics
             )
 
-        case .hatedTopics:
-            TurnBasedHatedChooseView(
-                selectedTopicIDs: currentSelectedTopicIDs.wrappedValue,
-                hatedTopicIDs: currentHatedTopicIDs,
-                onBack: {
-                    step = .preferences
-                },
-                onSubmit: finishCurrentTurn
-            )
-
-        case .putDownPhone:
-            SessionInstructionView(
-                message: "Letakkan HP di tempat yang\ndapat kalian berdua lihat bersama",
-                buttonTitle: "Mulai"
-            ) {
-                onCompleted(
-                    userSelectedTopicIDs,
-                    userHatedTopicIDs,
-                    partnerSelectedTopicIDs,
-                    partnerHatedTopicIDs
-                )
-            }
+        case .wouldYouRather:
+            WouldYouRatherView(topicIDs: combinedTopicIDs)
         }
     }
 
@@ -135,18 +113,45 @@ struct TurnBasedPreferencesView: View {
         currentHatedTopicIDs.wrappedValue.subtract(
             currentSelectedTopicIDs.wrappedValue
         )
-        step = .hatedTopics
+        isShowingHatedTopics = true
     }
 
     private func finishCurrentTurn() {
         switch turn {
         case .user:
+            isShowingHatedTopics = false
             turn = .partner
             step = .preferences
             alertTurn = .partner
 
         case .partner:
-            step = .putDownPhone
+            printCombinedPreferences()
+            isShowingHatedTopics = false
+            step = .wouldYouRather
+        }
+    }
+
+    private func printCombinedPreferences() {
+        let availableTopics = Topics.all
+            .filter { combinedTopicIDs.contains($0.id) }
+            .map { "\($0.id): \($0.name)" }
+
+        let output = availableTopics.isEmpty
+            ? "Tidak ada topik yang tersedia"
+            : availableTopics.joined(separator: ", ")
+
+        print("TurnBased combined preferences: [\(output)]")
+    }
+
+    private var combinedTopicIDs: [Int] {
+        let selectedIDs = userSelectedTopicIDs
+            .union(partnerSelectedTopicIDs)
+        let hatedIDs = userHatedTopicIDs
+            .union(partnerHatedTopicIDs)
+        let availableIDs = selectedIDs.subtracting(hatedIDs)
+
+        return Topics.all.compactMap { topic in
+            availableIDs.contains(topic.id) ? topic.id : nil
         }
     }
 }

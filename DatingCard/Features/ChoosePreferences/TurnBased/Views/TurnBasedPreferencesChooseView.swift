@@ -8,16 +8,12 @@ import SwiftUI
 struct TurnBasedPreferencesChooseView: View {
     @Binding var selectedTopicIDs: Set<Int>
 
-    let onClose: () -> Void
     let onContinue: () -> Void
 
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: Spacing.xl) {
-                    closeButton
-                        .frame(maxWidth: .infinity, alignment: .trailing)
-
                     header
 
                     TurnBasedTopicFlowLayout(spacing: Spacing.sm) {
@@ -46,19 +42,6 @@ struct TurnBasedPreferencesChooseView: View {
             .padding(.vertical, Spacing.lg)
         }
         .background(Color.bgPrimary.ignoresSafeArea())
-    }
-
-    private var closeButton: some View {
-        Button(action: onClose) {
-            Image(systemName: "xmark")
-                .font(.title3.weight(.medium))
-                .foregroundStyle(Color.textPrimary)
-                .frame(width: 44, height: 44)
-                .background(Color.surfaceSecondary)
-                .clipShape(Circle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Tutup")
     }
 
     private var header: some View {
@@ -155,7 +138,6 @@ struct TurnBasedTopicFlowLayout: Layout {
 #Preview {
     TurnBasedPreferencesChooseView(
         selectedTopicIDs: .constant([2, 7, 19]),
-        onClose: { },
         onContinue: { }
     )
 }

@@ -93,11 +93,16 @@ private struct HistorySessionDetailView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: Spacing.md) {
                 ForEach(session.cards) { card in
-                    QuestionCard(question: card.question)
+                    QuestionCard(
+                        question: card.question,
+                        topicID: card.topicID
+                    )
                 }
             }
-            .padding(.horizontal, Spacing.xs)
+            .scrollTargetLayout()
         }
+        .contentMargins(.horizontal, Spacing.xs, for: .scrollContent)
+        .scrollTargetBehavior(.viewAligned(limitBehavior: .always))
     }
 
     private var details: some View {
@@ -177,6 +182,7 @@ private struct HistorySession: Identifiable, Equatable {
     private static func makeCards(topics: [TopicModel]) -> [HistoryQuestion] {
         topics.enumerated().map { index, topic in
             HistoryQuestion(
+                topicID: topic.id,
                 question: makeQuestion(
                     topic: topic,
                     variant: index
@@ -205,6 +211,7 @@ private struct HistorySession: Identifiable, Equatable {
 
 private struct HistoryQuestion: Identifiable, Equatable {
     let id = UUID()
+    let topicID: Int
     let question: String
 }
 

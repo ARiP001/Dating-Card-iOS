@@ -12,7 +12,8 @@ final class SessionModel {
     var id: UUID
     var isContinue: Bool
 
-    // All topics originally selected for this session (unchanged)
+    // Final topic pool for this session: the union of both users'
+    // preferences after every hated topic has been removed.
     var selectedTopicIDs: [Int]
 
     // Topics that are still waiting to be played (a topic removed after all 5 question cards in its pack have been completed)

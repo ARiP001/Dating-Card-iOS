@@ -642,7 +642,7 @@ private extension Array {
     let selectedTopicIDs = Array(
         Topics.all
             .shuffled()
-            .prefix(5)
+            .prefix(10)
             .map(\.id)
     )
 
@@ -661,7 +661,6 @@ private extension Array {
     )
     .modelContainer(container)
 }
-
 #Preview("Bahas yang mana dulu?") {
     @Previewable @State var selectedCardID: UUID?
 
