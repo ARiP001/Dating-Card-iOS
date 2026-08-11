@@ -9,11 +9,16 @@ import SwiftUI
 
 struct AppClipContentView: View {
 
-    @EnvironmentObject private var router:
+    @EnvironmentObject
+    private var router:
         AppClipInvocationRouter
+
+    // MARK: - Navigation
 
     @State private var path:
         [AppClipDestination] = []
+
+    // MARK: - Preferences
 
     @State private var selectedTopicIDs:
         Set<Int> = []
@@ -21,25 +26,39 @@ struct AppClipContentView: View {
     @State private var hatedTopicIDs:
         Set<Int> = []
 
-    @State private var isSubmitting = false
+    // MARK: - Networking
+
+    @State private var isSubmitting =
+        false
 
     @State private var submissionError:
         String?
 
+    @State private var hasMarkedAsJoined =
+        false
+
     private let sessionService =
         SessionService()
 
+    // MARK: - Body
+
     var body: some View {
-        NavigationStack(path: $path) {
+        NavigationStack(
+            path: $path
+        ) {
 
             SelectedTopicsView(
-                selectedTopicIDs: $selectedTopicIDs
+                selectedTopicIDs:
+                    $selectedTopicIDs
             ) {
-                path.append(.hatedTopics)
+                path.append(
+                    .hatedTopics
+                )
             }
 
             .navigationDestination(
-                for: AppClipDestination.self
+                for:
+                    AppClipDestination.self
             ) { destination in
 
                 switch destination {
@@ -49,8 +68,10 @@ struct AppClipContentView: View {
                     HatedTopicsView(
                         selectedTopicIDs:
                             $selectedTopicIDs,
+
                         hatedTopicIDs:
                             $hatedTopicIDs,
+
                         isSubmitting:
                             isSubmitting
                     ) {
@@ -65,10 +86,33 @@ struct AppClipContentView: View {
                 }
             }
         }
+
+        // Akan dijalankan lagi ketika
+        // sessionID berubah dari nil → actual ID.
+        .task(
+            id:
+                router.invocation?
+                    .sessionID
+        ) {
+            guard let sessionID =
+                    router.invocation?
+                        .sessionID
+            else {
+                return
+            }
+
+            await markAsJoinedIfNeeded(
+                sessionID:
+                    sessionID
+            )
+        }
+
         .alert(
             "Submission Failed",
-            isPresented: errorBinding
+            isPresented:
+                errorBinding
         ) {
+
             Button(
                 "OK",
                 role: .cancel
@@ -85,7 +129,47 @@ struct AppClipContentView: View {
         }
     }
 
-    // MARK: - Submit
+    // MARK: - Mark Joined
+
+    @MainActor
+    private func markAsJoinedIfNeeded(
+        sessionID: String
+    ) async {
+
+        guard !hasMarkedAsJoined else {
+            return
+        }
+
+        guard !sessionID.isEmpty,
+              sessionID !=
+                "Session tidak ditemukan"
+        else {
+            return
+        }
+
+        do {
+            try await sessionService
+                .markSessionAsJoined(
+                    sessionID:
+                        sessionID
+                )
+
+            hasMarkedAsJoined = true
+
+            print(
+                "APP CLIP JOINED SESSION:",
+                sessionID
+            )
+
+        } catch {
+            print(
+                "Failed marking session as joined:",
+                error.localizedDescription
+            )
+        }
+    }
+
+    // MARK: - Submit Preferences
 
     @MainActor
     private func submitPreferences() async {
@@ -95,6 +179,7 @@ struct AppClipContentView: View {
         else {
             submissionError =
                 "Invocation URL belum diterima."
+
             return
         }
 
@@ -107,10 +192,12 @@ struct AppClipContentView: View {
         else {
             submissionError =
                 "Session ID tidak ditemukan."
+
             return
         }
 
         isSubmitting = true
+
         submissionError = nil
 
         defer {
@@ -118,10 +205,10 @@ struct AppClipContentView: View {
         }
 
         do {
-
             try await sessionService
                 .submitPreferences(
-                    sessionID: sessionID,
+                    sessionID:
+                        sessionID,
 
                     selectedTopics:
                         selectedTopicIDs
@@ -132,14 +219,17 @@ struct AppClipContentView: View {
                             .sorted()
                 )
 
-            path.append(.success)
+            path.append(
+                .success
+            )
 
         } catch {
-
             submissionError =
                 error.localizedDescription
         }
     }
+
+    // MARK: - Alert Binding
 
     private var errorBinding:
         Binding<Bool> {
@@ -159,7 +249,7 @@ struct AppClipContentView: View {
     }
 }
 
-// MARK: - Navigation Destination
+// MARK: - Destination
 
 private enum AppClipDestination:
     Hashable {

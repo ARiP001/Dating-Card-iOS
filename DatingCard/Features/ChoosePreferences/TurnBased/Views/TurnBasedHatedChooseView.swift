@@ -1,17 +1,15 @@
 //
-//  HatedTopicsView.swift
-//  SelectPreferencesClip
+//  TurnBasedHatedChooseView.swift
+//  DatingCard
 //
 
 import SwiftUI
 
-struct HatedTopicsView: View {
-    @Environment(\.dismiss) private var dismiss
-
-    @Binding var selectedTopicIDs: Set<Int>
+struct TurnBasedHatedChooseView: View {
+    let selectedTopicIDs: Set<Int>
     @Binding var hatedTopicIDs: Set<Int>
 
-    let isSubmitting: Bool
+    let onBack: () -> Void
     let onSubmit: () -> Void
 
     private var availableTopics: [TopicModel] {
@@ -25,7 +23,7 @@ struct HatedTopicsView: View {
                     backButton
                     header
 
-                    AppClipTopicFlowLayout(spacing: Spacing.sm) {
+                    TurnBasedTopicFlowLayout(spacing: Spacing.sm) {
                         ForEach(availableTopics) { topic in
                             TopicChip(
                                 title: topic.name,
@@ -36,21 +34,17 @@ struct HatedTopicsView: View {
                         }
                     }
                 }
-                .padding(.horizontal, Spacing.lg)
+                .padding(.horizontal, Spacing.xl)
                 .padding(.top, Spacing.md)
                 .padding(.bottom, Spacing.lg)
             }
+            .scrollBounceBehavior(.basedOnSize)
 
-            AppButton(
-                title: isSubmitting ? "Mengirim..." : "Mulai",
-                isEnabled: !isSubmitting,
-                action: onSubmit
-            )
-            .padding(.horizontal, Spacing.lg)
-            .padding(.bottom, Spacing.lg)
+            AppButton(title: "Mulai", action: onSubmit)
+                .padding(.horizontal, Spacing.xl)
+                .padding(.vertical, Spacing.lg)
         }
         .background(Color.bgPrimary.ignoresSafeArea())
-        .toolbar(.hidden, for: .navigationBar)
         .onAppear(perform: removeSelectedTopicsFromHatedTopics)
         .onChange(of: selectedTopicIDs) {
             removeSelectedTopicsFromHatedTopics()
@@ -58,9 +52,7 @@ struct HatedTopicsView: View {
     }
 
     private var backButton: some View {
-        Button {
-            dismiss()
-        } label: {
+        Button(action: onBack) {
             Image(systemName: "chevron.left")
                 .font(AppFont.headlineSemibold)
                 .foregroundStyle(Color.bgCard)
@@ -78,9 +70,10 @@ struct HatedTopicsView: View {
                 .font(AppFont.title3Bold)
                 .foregroundStyle(Color.textPrimary)
 
-            Text("Topik yang kamu pilih tidak akan\nmuncul dalam obrolan kalian.")
+            Text("Topik yang kamu pilih tidak akan muncul dalam obrolan kalian.")
                 .font(AppFont.bodyRegular)
                 .foregroundStyle(Color.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -98,11 +91,10 @@ struct HatedTopicsView: View {
 }
 
 #Preview {
-    NavigationStack {
-        HatedTopicsView(
-            selectedTopicIDs: .constant([1, 2, 7]),
-            hatedTopicIDs: .constant([19, 23]),
-            isSubmitting: false
-        ) { }
-    }
+    TurnBasedHatedChooseView(
+        selectedTopicIDs: [1, 2, 6],
+        hatedTopicIDs: .constant([7, 14]),
+        onBack: { },
+        onSubmit: { }
+    )
 }

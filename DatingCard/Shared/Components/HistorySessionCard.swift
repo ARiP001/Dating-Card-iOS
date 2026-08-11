@@ -25,9 +25,9 @@ struct HistorySessionCard: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, Spacing.md)
-            .padding(.vertical, Spacing.sm)
+            .padding(.vertical, Spacing.md)
             .background(Color.accentPrimary)
-            .clipShape(RoundedRectangle(cornerRadius: Radius.nonclickable))
+            .clipShape(RoundedRectangle(cornerRadius: Radius.md))
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
