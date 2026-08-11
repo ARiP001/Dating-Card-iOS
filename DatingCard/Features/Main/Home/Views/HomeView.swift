@@ -8,50 +8,86 @@
 import SwiftUI
 
 struct HomeView: View {
-    @State private var isShowingTopicSelection = false
+    private enum PendingRoute {
+        case alternating
+        case individual
+    }
 
-    var onAlternatingSelected: () -> Void = { }
-    var onIndividualSelected: () -> Void = { }
+    @State private var isShowingTopicSelection = false
+    @State private var pendingRoute: PendingRoute?
+    @State private var isShowingAlternatingFlow = false
+    @State private var isShowingIndividualFlow = false
 
     var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .topLeading) {
-                VStack(alignment: .leading, spacing: Spacing.md) {
-                    Text("Kenal Lebih\ndari Sekadar\nNama")
-                        .font(AppFont.largeTitleBold)
-                        .foregroundStyle(Color.textPrimary)
+        NavigationStack {
+            GeometryReader { geometry in
+                ZStack(alignment: .topLeading) {
+                    VStack(alignment: .leading, spacing: Spacing.md) {
+                        Text("Kenal Lebih\ndari Sekadar\nNama")
+                            .font(AppFont.largeTitleBold)
+                            .foregroundStyle(Color.textPrimary)
 
-                    Text(
-                        "Mainkan kartu bersama,\nsaling bercerita, dan\nmengenal lebih dekat"
+                        Text(
+                            "Mainkan kartu bersama,\nsaling bercerita, dan\nmengenal lebih dekat"
+                        )
+                        .font(AppFont.title3Regular)
+                        .foregroundStyle(Color.textSecondary)
+                    }
+                    .padding(.horizontal, Spacing.xl)
+                    .padding(.top, Spacing.xl)
+
+                    startControl(
+                        maximumDiameter: min(
+                            geometry.size.width * 1.1,
+                            430
+                        )
                     )
-                    .font(AppFont.title3Regular)
-                    .foregroundStyle(Color.textSecondary)
+                    .position(
+                        x: geometry.size.width / 2,
+                        y: geometry.size.height * 0.60
+                    )
                 }
-                .padding(.horizontal, Spacing.xl)
-                .padding(.top, Spacing.xl)
-
-                startControl(
-                    maximumDiameter: min(
-                        geometry.size.width * 1.1,
-                        430
-                    )
+            }
+            .ignoresSafeArea(.container, edges: .bottom)
+            .background(Color.bgPrimary.ignoresSafeArea())
+            .navigationDestination(isPresented: $isShowingAlternatingFlow) {
+                TurnBasedPreferencesView()
+                    .toolbar(.hidden, for: .tabBar)
+            }
+            .navigationDestination(isPresented: $isShowingIndividualFlow) {
+                QRView()
+                    .toolbar(.hidden, for: .tabBar)
+            }
+            .sheet(
+                isPresented: $isShowingTopicSelection,
+                onDismiss: presentPendingRoute
+            ) {
+                TopicSelectionSheet(
+                    onAlternatingSelected: {
+                        pendingRoute = .alternating
+                    },
+                    onIndividualSelected: {
+                        pendingRoute = .individual
+                    }
                 )
-                .position(
-                    x: geometry.size.width / 2,
-                    y: geometry.size.height * 0.60
-                )
+                .presentationDetents([.fraction(0.64)])
+                .presentationDragIndicator(.visible)
+                .presentationCornerRadius(Radius.xl)
+                .presentationBackground(Color.bgPrimary)
             }
         }
-        .background(Color.bgPrimary.ignoresSafeArea())
-        .sheet(isPresented: $isShowingTopicSelection) {
-            TopicSelectionSheet(
-                onAlternatingSelected: onAlternatingSelected,
-                onIndividualSelected: onIndividualSelected
-            )
-            .presentationDetents([.fraction(0.58)])
-            .presentationDragIndicator(.visible)
-            .presentationCornerRadius(Radius.xl)
-            .presentationBackground(Color.bgPrimary)
+    }
+
+    private func presentPendingRoute() {
+        guard let pendingRoute else { return }
+
+        self.pendingRoute = nil
+
+        switch pendingRoute {
+        case .alternating:
+            isShowingAlternatingFlow = true
+        case .individual:
+            isShowingIndividualFlow = true
         }
     }
 
@@ -113,12 +149,12 @@ private struct TopicSelectionSheet: View {
 
             VStack(alignment: .leading, spacing: Spacing.lg) {
                 explanation(
-                    title: "1. Bergantian:",
+                    title: "Bergantian:",
                     description: "Pilih topik secara bergantian dari satu perangkat."
                 )
 
                 explanation(
-                    title: "2. Masing-masing:",
+                    title: "Masing-masing:",
                     description: "Pilih topik masing-masing dari perangkat kalian."
                 )
             }
@@ -127,18 +163,18 @@ private struct TopicSelectionSheet: View {
 
             VStack(spacing: Spacing.sm) {
                 AppButton(title: "Bergantian") {
-                    dismiss()
                     onAlternatingSelected()
+                    dismiss()
                 }
 
-                AppButton(title: "Masing-masing") {
-                    dismiss()
+                AppButton(title: "Masing-masing", variant: .secondary) {
                     onIndividualSelected()
+                    dismiss()
                 }
             }
         }
         .padding(.horizontal, Spacing.xl)
-        .padding(.top, Spacing.sm)
+        .padding(.top, Spacing.md)
         .padding(.bottom, Spacing.lg)
         .background(Color.bgPrimary)
     }

@@ -9,7 +9,6 @@ struct TurnBasedHatedChooseView: View {
     let selectedTopicIDs: Set<Int>
     @Binding var hatedTopicIDs: Set<Int>
 
-    let onBack: () -> Void
     let onSubmit: () -> Void
 
     private var availableTopics: [TopicModel] {
@@ -20,7 +19,6 @@ struct TurnBasedHatedChooseView: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: Spacing.xl) {
-                    backButton
                     header
 
                     TurnBasedTopicFlowLayout(spacing: Spacing.sm) {
@@ -49,19 +47,6 @@ struct TurnBasedHatedChooseView: View {
         .onChange(of: selectedTopicIDs) {
             removeSelectedTopicsFromHatedTopics()
         }
-    }
-
-    private var backButton: some View {
-        Button(action: onBack) {
-            Image(systemName: "chevron.left")
-                .font(AppFont.headlineSemibold)
-                .foregroundStyle(Color.bgCard)
-                .frame(width: 44, height: 44)
-                .background(Color.accentPrimary)
-                .clipShape(Circle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Kembali")
     }
 
     private var header: some View {
@@ -94,7 +79,6 @@ struct TurnBasedHatedChooseView: View {
     TurnBasedHatedChooseView(
         selectedTopicIDs: [1, 2, 6],
         hatedTopicIDs: .constant([7, 14]),
-        onBack: { },
         onSubmit: { }
     )
 }

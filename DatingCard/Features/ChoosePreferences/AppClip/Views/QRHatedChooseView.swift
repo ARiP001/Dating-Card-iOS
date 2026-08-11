@@ -9,7 +9,6 @@ struct QRHatedChooseView: View {
     let selectedTopicIDs: Set<Int>
     @Binding var hatedTopicIDs: Set<Int>
 
-    let onBack: () -> Void
     let onSubmit: () -> Void
 
     private var availableTopics: [TopicModel] {
@@ -22,8 +21,6 @@ struct QRHatedChooseView: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: Spacing.xl) {
-                    backButton
-
                     header
 
                     TopicFlowLayout(spacing: Spacing.sm) {
@@ -56,19 +53,6 @@ struct QRHatedChooseView: View {
         }
     }
 
-    private var backButton: some View {
-        Button(action: onBack) {
-            Image(systemName: "chevron.left")
-                .font(.headline.weight(.semibold))
-                .foregroundStyle(Color.bgCard)
-                .frame(width: 44, height: 44)
-                .background(Color.accentPrimary)
-                .clipShape(Circle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Kembali")
-    }
-
     private var header: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             Text("Ada topik yang belum siap\nkamu bagikan?")
@@ -99,7 +83,6 @@ struct QRHatedChooseView: View {
 //    QRHatedChooseView(
 //        selectedTopicIDs: [1, 2, 6],
 //        hatedTopicIDs: $hatedTopicIDs,
-//        onBack: { },
 //        onSubmit: { }
 //    )
 //}
