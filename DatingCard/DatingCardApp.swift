@@ -13,7 +13,10 @@ struct DatingCardApp: App {
     var body: some Scene {
         WindowGroup {
 //            ContentView()
-            PreferenceChooseContentView()
+//            PreferenceChooseContentView()
+//            QRView()
+//            TurnBasedPreferencesView()
+            MainTabView()
         }
         .modelContainer(for: [
                   CardModel.self,

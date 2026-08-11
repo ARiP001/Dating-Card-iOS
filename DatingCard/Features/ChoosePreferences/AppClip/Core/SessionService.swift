@@ -61,8 +61,8 @@ struct SessionService {
             status: "waiting"
         )
 
-        request.httpBody =
-            try JSONEncoder().encode(body)
+        request.httpBody = try JSONEncoder()
+            .encode(body)
 
         let (data, response) =
             try await session.data(for: request)
@@ -74,12 +74,11 @@ struct SessionService {
         )
     }
 
-    // MARK: - Fetch
+    // MARK: - Fetch Session
 
     func fetchSession(
         id: String
     ) async throws -> ConversationSession {
-
         var components = URLComponents(
             url: SupabaseConfiguration.sessionsEndpoint,
             resolvingAgainstBaseURL: false
@@ -131,6 +130,64 @@ struct SessionService {
         return session
     }
 
+    // MARK: - Mark App Clip Joined
+
+    func markSessionAsJoined(
+        sessionID: String
+    ) async throws {
+        var components = URLComponents(
+            url: SupabaseConfiguration.sessionsEndpoint,
+            resolvingAgainstBaseURL: false
+        )
+
+        components?.queryItems = [
+            URLQueryItem(
+                name: "id",
+                value: "eq.\(sessionID)"
+            ),
+
+            // Hanya update jika masih waiting.
+            // Mencegah completed berubah kembali menjadi joined.
+            URLQueryItem(
+                name: "status",
+                value: "eq.waiting"
+            )
+        ]
+
+        guard let url = components?.url else {
+            throw SessionServiceError.invalidResponse
+        }
+
+        var request = URLRequest(url: url)
+
+        request.httpMethod = "PATCH"
+
+        applyCommonHeaders(to: &request)
+
+        request.setValue(
+            "return=minimal",
+            forHTTPHeaderField: "Prefer"
+        )
+
+        let body = JoinedSessionRequest(
+            status: "joined",
+            updatedAt: ISO8601DateFormatter()
+                .string(from: Date())
+        )
+
+        request.httpBody = try JSONEncoder()
+            .encode(body)
+
+        let (data, response) =
+            try await session.data(for: request)
+
+        try validate(
+            response: response,
+            data: data,
+            validStatusCodes: 200...299
+        )
+    }
+
     // MARK: - Submit Preferences
 
     func submitPreferences(
@@ -138,7 +195,6 @@ struct SessionService {
         selectedTopics: [Int],
         hatedTopics: [Int]
     ) async throws {
-
         var components = URLComponents(
             url: SupabaseConfiguration.sessionsEndpoint,
             resolvingAgainstBaseURL: false
@@ -174,8 +230,8 @@ struct SessionService {
                 .string(from: Date())
         )
 
-        request.httpBody =
-            try JSONEncoder().encode(body)
+        request.httpBody = try JSONEncoder()
+            .encode(body)
 
         let (data, response) =
             try await session.data(for: request)
@@ -187,12 +243,11 @@ struct SessionService {
         )
     }
 
-    // MARK: - Delete
+    // MARK: - Delete Session
 
     func deleteSession(
         id: String
     ) async throws {
-
         var components = URLComponents(
             url: SupabaseConfiguration.sessionsEndpoint,
             resolvingAgainstBaseURL: false
@@ -263,7 +318,6 @@ struct SessionService {
         data: Data,
         validStatusCodes: ClosedRange<Int>
     ) throws {
-
         guard let httpResponse =
                 response as? HTTPURLResponse
         else {
@@ -279,11 +333,15 @@ struct SessionService {
         guard validStatusCodes.contains(
             httpResponse.statusCode
         ) else {
-
             let message = String(
                 data: data,
                 encoding: .utf8
             ) ?? "Unknown error"
+
+            print(
+                "Supabase Error:",
+                message
+            )
 
             throw SessionServiceError.serverError(
                 statusCode: httpResponse.statusCode,
@@ -297,35 +355,38 @@ struct SessionService {
 
 private struct CreateSessionRequest: Encodable {
     let id: String
-
     let selectedTopics: [Int]
     let hatedTopics: [Int]
-
     let status: String
 
     enum CodingKeys: String, CodingKey {
         case id
-
         case selectedTopics = "selected_topics"
         case hatedTopics = "hated_topics"
-
         case status
+    }
+}
+
+private struct JoinedSessionRequest: Encodable {
+    let status: String
+    let updatedAt: String
+
+    enum CodingKeys: String, CodingKey {
+        case status
+        case updatedAt = "updated_at"
     }
 }
 
 private struct UpdatePreferencesRequest: Encodable {
     let selectedTopics: [Int]
     let hatedTopics: [Int]
-
     let status: String
     let updatedAt: String
 
     enum CodingKeys: String, CodingKey {
         case selectedTopics = "selected_topics"
         case hatedTopics = "hated_topics"
-
         case status
-
         case updatedAt = "updated_at"
     }
 }

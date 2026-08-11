@@ -54,6 +54,16 @@
 				Features/ChoosePreferences/AppClip/Core/ConversationTopic.swift,
 				Features/ChoosePreferences/AppClip/Core/SessionService.swift,
 				Features/ChoosePreferences/AppClip/Core/SupabaseConfiguration.swift,
+				Shared/Components/AppButton.swift,
+				Shared/Components/AppLoadingView.swift,
+				Shared/Components/TopicChip.swift,
+				Shared/Data/Topics.swift,
+				"Shared/Extensions/Color+extension.swift",
+				"Shared/Extensions/Font+extension.swift",
+				"Shared/Extensions/Icon+extension.swift",
+				"Shared/Extensions/Radius+extension.swift",
+				"Shared/Extensions/Spacing+extension.swift",
+				Shared/Models/TopicModel.swift,
 			);
 			target = 5E99449F302A2A60002CE84E /* SelectPreferencesClip */;
 		};

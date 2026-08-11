@@ -1,21 +1,21 @@
 //
-//  HatedTopicsView.swift
-//  SelectPreferencesClip
+//  QRHatedChooseView.swift
+//  DatingCard
 //
 
 import SwiftUI
 
-struct HatedTopicsView: View {
-    @Environment(\.dismiss) private var dismiss
-
-    @Binding var selectedTopicIDs: Set<Int>
+struct QRHatedChooseView: View {
+    let selectedTopicIDs: Set<Int>
     @Binding var hatedTopicIDs: Set<Int>
 
-    let isSubmitting: Bool
+    let onBack: () -> Void
     let onSubmit: () -> Void
 
     private var availableTopics: [TopicModel] {
-        Topics.all.filter { !selectedTopicIDs.contains($0.id) }
+        Topics.all.filter {
+            !selectedTopicIDs.contains($0.id)
+        }
     }
 
     var body: some View {
@@ -23,9 +23,10 @@ struct HatedTopicsView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: Spacing.xl) {
                     backButton
+
                     header
 
-                    AppClipTopicFlowLayout(spacing: Spacing.sm) {
+                    TopicFlowLayout(spacing: Spacing.sm) {
                         ForEach(availableTopics) { topic in
                             TopicChip(
                                 title: topic.name,
@@ -36,33 +37,29 @@ struct HatedTopicsView: View {
                         }
                     }
                 }
-                .padding(.horizontal, Spacing.lg)
-                .padding(.top, Spacing.md)
+                .padding(.horizontal, Spacing.xl)
+                .padding(.top, Spacing.lg)
                 .padding(.bottom, Spacing.lg)
             }
+            .scrollBounceBehavior(.basedOnSize)
 
             AppButton(
-                title: isSubmitting ? "Mengirim..." : "Mulai",
-                isEnabled: !isSubmitting,
+                title: "Mulai",
                 action: onSubmit
             )
-            .padding(.horizontal, Spacing.lg)
-            .padding(.bottom, Spacing.lg)
+            .padding(.horizontal, Spacing.xl)
+            .padding(.vertical, Spacing.lg)
         }
         .background(Color.bgPrimary.ignoresSafeArea())
-        .toolbar(.hidden, for: .navigationBar)
-        .onAppear(perform: removeSelectedTopicsFromHatedTopics)
-        .onChange(of: selectedTopicIDs) {
-            removeSelectedTopicsFromHatedTopics()
+        .onAppear {
+            hatedTopicIDs.subtract(selectedTopicIDs)
         }
     }
 
     private var backButton: some View {
-        Button {
-            dismiss()
-        } label: {
+        Button(action: onBack) {
             Image(systemName: "chevron.left")
-                .font(AppFont.headlineSemibold)
+                .font(.headline.weight(.semibold))
                 .foregroundStyle(Color.bgCard)
                 .frame(width: 44, height: 44)
                 .background(Color.accentPrimary)
@@ -78,9 +75,12 @@ struct HatedTopicsView: View {
                 .font(AppFont.title3Bold)
                 .foregroundStyle(Color.textPrimary)
 
-            Text("Topik yang kamu pilih tidak akan\nmuncul dalam obrolan kalian.")
-                .font(AppFont.bodyRegular)
-                .foregroundStyle(Color.textSecondary)
+            Text(
+                "Topik yang kamu pilih tidak akan muncul dalam obrolan kalian."
+            )
+            .font(AppFont.bodyRegular)
+            .foregroundStyle(Color.textSecondary)
+            .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -91,18 +91,15 @@ struct HatedTopicsView: View {
             hatedTopicIDs.insert(topicID)
         }
     }
-
-    private func removeSelectedTopicsFromHatedTopics() {
-        hatedTopicIDs.subtract(selectedTopicIDs)
-    }
 }
 
-#Preview {
-    NavigationStack {
-        HatedTopicsView(
-            selectedTopicIDs: .constant([1, 2, 7]),
-            hatedTopicIDs: .constant([19, 23]),
-            isSubmitting: false
-        ) { }
-    }
-}
+//#Preview {
+//    @Previewable @State var hatedTopicIDs: Set<Int> = [7, 14]
+//
+//    QRHatedChooseView(
+//        selectedTopicIDs: [1, 2, 6],
+//        hatedTopicIDs: $hatedTopicIDs,
+//        onBack: { },
+//        onSubmit: { }
+//    )
+//}
