@@ -31,7 +31,7 @@ struct TurnBasedPreferencesView: View {
 
     private enum Step: Equatable {
         case preferences
-        case putDownPhone
+        case wouldYouRather
     }
 
     @State private var turn: Turn = .user
@@ -43,13 +43,6 @@ struct TurnBasedPreferencesView: View {
     @State private var userHatedTopicIDs: Set<Int> = []
     @State private var partnerSelectedTopicIDs: Set<Int> = []
     @State private var partnerHatedTopicIDs: Set<Int> = []
-
-    var onCompleted: (
-        _ userSelectedTopicIDs: Set<Int>,
-        _ userHatedTopicIDs: Set<Int>,
-        _ partnerSelectedTopicIDs: Set<Int>,
-        _ partnerHatedTopicIDs: Set<Int>
-    ) -> Void = { _, _, _, _ in }
 
     var body: some View {
         ZStack {
@@ -93,18 +86,8 @@ struct TurnBasedPreferencesView: View {
                 onContinue: showHatedTopics
             )
 
-        case .putDownPhone:
-            SessionInstructionView(
-                message: "Letakkan HP di tempat yang\ndapat kalian berdua lihat bersama",
-                buttonTitle: "Mulai"
-            ) {
-                onCompleted(
-                    userSelectedTopicIDs,
-                    userHatedTopicIDs,
-                    partnerSelectedTopicIDs,
-                    partnerHatedTopicIDs
-                )
-            }
+        case .wouldYouRather:
+            WouldYouRatherView(topicIDs: combinedTopicIDs)
         }
     }
 
@@ -144,20 +127,13 @@ struct TurnBasedPreferencesView: View {
         case .partner:
             printCombinedPreferences()
             isShowingHatedTopics = false
-            step = .putDownPhone
+            step = .wouldYouRather
         }
     }
 
     private func printCombinedPreferences() {
-        let selectedTopicIDs = userSelectedTopicIDs
-            .union(partnerSelectedTopicIDs)
-        let hatedTopicIDs = userHatedTopicIDs
-            .union(partnerHatedTopicIDs)
-        let availableTopicIDs = selectedTopicIDs
-            .subtracting(hatedTopicIDs)
-
         let availableTopics = Topics.all
-            .filter { availableTopicIDs.contains($0.id) }
+            .filter { combinedTopicIDs.contains($0.id) }
             .map { "\($0.id): \($0.name)" }
 
         let output = availableTopics.isEmpty
@@ -165,6 +141,18 @@ struct TurnBasedPreferencesView: View {
             : availableTopics.joined(separator: ", ")
 
         print("TurnBased combined preferences: [\(output)]")
+    }
+
+    private var combinedTopicIDs: [Int] {
+        let selectedIDs = userSelectedTopicIDs
+            .union(partnerSelectedTopicIDs)
+        let hatedIDs = userHatedTopicIDs
+            .union(partnerHatedTopicIDs)
+        let availableIDs = selectedIDs.subtracting(hatedIDs)
+
+        return Topics.all.compactMap { topic in
+            availableIDs.contains(topic.id) ? topic.id : nil
+        }
     }
 }
 

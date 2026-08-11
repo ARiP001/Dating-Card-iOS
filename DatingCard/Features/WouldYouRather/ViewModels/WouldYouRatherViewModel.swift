@@ -30,10 +30,14 @@ final class WouldYouRatherViewModel: ObservableObject {
     private var hasPreparedSession = false
 
     init(topicIDs: [Int]) {
-        self.topicIDs = topicIDs
+        let validTopicIDs = Set(Topics.all.map(\.id))
+        let normalizedTopicIDs = Array(
+            Set(topicIDs).intersection(validTopicIDs)
+        )
+        .sorted()
 
-        // First animation always uses all available topics.
-        self.animationTopicIDs = Topics.all.map(\.id).shuffled()
+        self.topicIDs = normalizedTopicIDs
+        self.animationTopicIDs = normalizedTopicIDs.shuffled()
     }
 
     func prepareSession(in modelContext: ModelContext) {
@@ -57,8 +61,16 @@ final class WouldYouRatherViewModel: ObservableObject {
             )
 
             modelContext.insert(newSession)
+            session = newSession
 
-            // Pick one random card from each selected topic.
+            // The shuffle animation reads the topic pool saved in the
+            // session, rather than displaying every topic in Topics.all.
+            animationTopicIDs = newSession.selectedTopicIDs.shuffled()
+            try modelContext.save()
+
+            // Pick one random persisted card from each selected topic. Until
+            // the full question data is available, a lightweight topic card
+            // keeps the Would You Rather UI usable for every valid topic.
             let descriptor = FetchDescriptor<CardModel>(
                 predicate: #Predicate {
                     !$0.isPicked
@@ -67,10 +79,14 @@ final class WouldYouRatherViewModel: ObservableObject {
 
             let availableCards = try modelContext.fetch(descriptor)
 
-            currentPackCards = topicIDs.compactMap { topicID in
+            currentPackCards = topicIDs.map { topicID in
                 availableCards
                     .filter { $0.topicID == topicID }
                     .randomElement()
+                    ?? CardModel(
+                        topicID: topicID,
+                        question: ""
+                    )
             }
 
             // Pick 2 topics/cards for Would You Rather.
@@ -78,15 +94,10 @@ final class WouldYouRatherViewModel: ObservableObject {
                 currentPackCards.shuffled().prefix(2)
             )
 
-            guard currentPackCards.count == topicIDs.count,
-                  pickedPackCards.count == 2 else {
+            guard pickedPackCards.count == 2 else {
                 screenState = .empty
                 return
             }
-
-            try modelContext.save()
-
-            session = newSession
 
         } catch {
             screenState = .empty

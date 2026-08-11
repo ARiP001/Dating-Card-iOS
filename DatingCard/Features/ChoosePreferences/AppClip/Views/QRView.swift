@@ -19,8 +19,6 @@ struct QRView: View {
     @State private var isShowingHatedTopics = false
     @State private var hasPrintedCombinedPreferences = false
 
-    var onPreferencesCompleted: (Set<Int>, Set<Int>) -> Void = { _, _ in }
-
     var body: some View {
         Group {
             if shouldShowCompletedContent {
@@ -98,15 +96,7 @@ struct QRView: View {
 
     @ViewBuilder
     private var completedContent: some View {
-        SessionInstructionView(
-            message: "Letakkan HP di tempat yang\ndapat kalian berdua lihat bersama",
-            buttonTitle: "Mulai"
-        ) {
-            onPreferencesCompleted(
-                selectedTopicIDs,
-                hatedTopicIDs
-            )
-        }
+        WouldYouRatherView(topicIDs: combinedTopicIDs)
     }
 
     private var qrContent: some View {
@@ -206,21 +196,8 @@ struct QRView: View {
 
         hasPrintedCombinedPreferences = true
 
-        let appClipSelectedTopicIDs = Set(
-            viewModel.receivedSelectedTopicIDs
-        )
-        let appClipHatedTopicIDs = Set(
-            viewModel.receivedHatedTopicIDs
-        )
-        let combinedSelectedTopicIDs = selectedTopicIDs
-            .union(appClipSelectedTopicIDs)
-        let combinedHatedTopicIDs = hatedTopicIDs
-            .union(appClipHatedTopicIDs)
-        let availableTopicIDs = combinedSelectedTopicIDs
-            .subtracting(combinedHatedTopicIDs)
-
         let availableTopics = Topics.all
-            .filter { availableTopicIDs.contains($0.id) }
+            .filter { combinedTopicIDs.contains($0.id) }
             .map { "\($0.id): \($0.name)" }
 
         let output = availableTopics.isEmpty
@@ -228,6 +205,24 @@ struct QRView: View {
             : availableTopics.joined(separator: ", ")
 
         print("AppClip combined preferences: [\(output)]")
+    }
+
+    private var combinedTopicIDs: [Int] {
+        let partnerSelectedTopicIDs = Set(
+            viewModel.receivedSelectedTopicIDs
+        )
+        let partnerHatedTopicIDs = Set(
+            viewModel.receivedHatedTopicIDs
+        )
+        let selectedIDs = selectedTopicIDs
+            .union(partnerSelectedTopicIDs)
+        let hatedIDs = hatedTopicIDs
+            .union(partnerHatedTopicIDs)
+        let availableIDs = selectedIDs.subtracting(hatedIDs)
+
+        return Topics.all.compactMap { topic in
+            availableIDs.contains(topic.id) ? topic.id : nil
+        }
     }
 }
 
