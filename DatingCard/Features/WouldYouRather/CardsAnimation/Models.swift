@@ -1,10 +1,25 @@
 import SwiftUI
 
 struct ChoiceCard: Identifiable, Equatable {
-    let id = UUID()
+    let id: UUID
+    let topicID: Int?
     let title: String
     let symbol: String
     let color: Color
+
+    init(
+        id: UUID = UUID(),
+        topicID: Int? = nil,
+        title: String,
+        symbol: String,
+        color: Color
+    ) {
+        self.id = id
+        self.topicID = topicID
+        self.title = title
+        self.symbol = symbol
+        self.color = color
+    }
 }
 
 struct SwipeCard: Identifiable, Equatable {

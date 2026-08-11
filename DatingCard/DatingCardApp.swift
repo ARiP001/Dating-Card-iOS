@@ -12,8 +12,11 @@ import SwiftData
 struct DatingCardApp: App {
     var body: some Scene {
         WindowGroup {
+            WouldYouRatherView(
+                      topicIDs: [1, 2, 3, 4, 5]
+                  )
 //            ContentView()
-            PreferenceChooseContentView()
+//            PreferenceChooseContentView()
         }
         .modelContainer(for: [
                   CardModel.self,
