@@ -108,8 +108,8 @@ struct HomeView: View {
                         )
                     )
                     .frame(
-                        width: maximumDiameter - (CGFloat(index) * 42),
-                        height: maximumDiameter - (CGFloat(index) * 42)
+                        width: max(0, maximumDiameter - (CGFloat(index) * 42)),
+                        height: max(0, maximumDiameter - (CGFloat(index) * 42))
                     )
             }
 

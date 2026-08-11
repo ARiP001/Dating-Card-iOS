@@ -28,7 +28,7 @@ enum Topics {
 
         // MARK: Relationship
         TopicModel(id: 14, name: "First Connections"),
-        TopicModel(id: 15, name: "Healty Relationships"),
+        TopicModel(id: 15, name: "Healthy Relationships"),
         TopicModel(id: 16, name: "Communication"),
         TopicModel(id: 17, name: "Quality Time"),
         TopicModel(id: 18, name: "Love In The Future"),

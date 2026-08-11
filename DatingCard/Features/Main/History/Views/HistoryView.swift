@@ -1,16 +1,9 @@
-//
-//  HistoryView.swift
-//  DatingCard
-//
-//  Created by Arif Fathurrahman on 11/08/26.
-//
-
+import SwiftData
 import SwiftUI
 
 struct HistoryView: View {
-    @State private var selectedSession: HistorySession?
-
-    private let sessions = HistorySession.samples
+    @Query(sort: \SessionModel.createdAt, order: .reverse) private var sessions: [SessionModel]
+    @State private var selectedSession: SessionModel?
 
     var body: some View {
         ScrollView {
@@ -20,10 +13,21 @@ struct HistoryView: View {
                     .foregroundStyle(Color.textPrimary)
                     .padding(.bottom, Spacing.sm)
 
-                ForEach(sessions) { session in
+                if sessions.isEmpty {
+                    ContentUnavailableView(
+                        "Belum ada riwayat sesi",
+                        systemImage: "clock.arrow.circlepath",
+                        description: Text("Sesi yang sudah kamu mulai akan muncul di sini.")
+                    )
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, Spacing.xxl)
+                }
+
+                ForEach(sessions, id: \.id) { session in
                     HistorySessionCard(
                         title: session.title,
-                        date: session.date
+                        date: "\(session.createdAt.formatted(.dateTime.day().month(.wide).year().locale(Locale(identifier: "id_ID")))) | \(session.isContinue ? "Belum Selesai" : "Selesai")",
+                        isContinue: session.isContinue
                     ) {
                         selectedSession = session
                     }
@@ -34,57 +38,70 @@ struct HistoryView: View {
             .padding(.bottom, Spacing.lg)
         }
         .background(Color.bgPrimary.ignoresSafeArea())
-        .sheet(item: $selectedSession) { session in
-            HistorySessionDetailView(session: session)
-            .presentationDetents([.large])
-            .presentationDragIndicator(.visible)
-            .presentationCornerRadius(Radius.xl)
-            .presentationBackground(Color.bgCard)
+        .sheet(isPresented: Binding(
+            get: { selectedSession != nil },
+            set: { if !$0 { selectedSession = nil } }
+        )) {
+            if let selectedSession {
+                HistorySessionDetailView(session: selectedSession)
+                    .presentationDetents([.large])
+                    .presentationDragIndicator(.visible)
+                    .presentationCornerRadius(Radius.xl)
+                    .presentationBackground(Color.bgCard)
+            }
         }
     }
 }
 
 private struct HistorySessionDetailView: View {
-    let session: HistorySession
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
+    let session: SessionModel
+    @State private var isEditingTitle = false
+    @State private var editedTitle = ""
+    @State private var editedDate = Date()
+    @State private var resumeSession = false
 
     var body: some View {
         VStack(spacing: 0) {
-            header
-                .padding(.top, Spacing.md)
-                .padding(.bottom, Spacing.lg)
-
+            header.padding(.top, Spacing.md).padding(.bottom, Spacing.lg)
             questionDeck
-
-            details
-                .padding(.top, Spacing.lg)
-
+            details.padding(.top, Spacing.lg)
             Spacer(minLength: Spacing.lg)
-
-            AppButton(title: "Bergantian") { }
-                .padding(.bottom, Spacing.lg)
+            if session.isContinue {
+                AppButton(title: "Lanjutkan sesi") { resumeSession = true }
+                    .padding(.bottom, Spacing.lg)
+            }
         }
         .padding(.horizontal, Spacing.xl)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color.bgCard)
+        .onAppear { editedTitle = session.title; editedDate = session.createdAt }
+        .fullScreenCover(isPresented: $resumeSession) {
+            WouldYouRatherView(session: session)
+        }
     }
 
     private var header: some View {
         ZStack {
-            Text(session.title)
-                .font(AppFont.bodyBold)
-                .foregroundStyle(Color.textPrimary)
-                .frame(maxWidth: .infinity, alignment: .center)
-                .lineLimit(1)
-
+            if isEditingTitle {
+                TextField("Nama sesi", text: $editedTitle, onCommit: saveTitle)
+                    .font(AppFont.bodyBold).multilineTextAlignment(.center)
+                    .textFieldStyle(.roundedBorder).padding(.horizontal, 54)
+            } else {
+                Text(session.title).font(AppFont.bodyBold).lineLimit(1)
+            }
             HStack {
-                iconButton(systemName: "pencil")
-
+                Button { isEditingTitle ? saveTitle() : (isEditingTitle = true) } label: {
+                    Image(systemName: isEditingTitle ? "checkmark" : "pencil")
+                        .foregroundStyle(Color.textPrimary).frame(width: 44, height: 44)
+                        .background(Color.surfaceSecondary).clipShape(Circle())
+                }.buttonStyle(.plain)
                 Spacer()
-
-                iconButton(systemName: "xmark") {
-                    dismiss()
-                }
+                Button { dismiss() } label: {
+                    Image(systemName: "xmark").foregroundStyle(Color.textPrimary).frame(width: 44, height: 44)
+                        .background(Color.surfaceSecondary).clipShape(Circle())
+                }.buttonStyle(.plain)
             }
         }
     }
@@ -92,129 +109,46 @@ private struct HistorySessionDetailView: View {
     private var questionDeck: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: Spacing.md) {
-                ForEach(session.cards) { card in
-                    QuestionCard(
-                        question: card.question,
-                        topicID: card.topicID
-                    )
+                ForEach(session.pickedCards, id: \.id) { card in
+                    QuestionCard(question: card.question, topicID: card.topicID)
+                }
+                if session.pickedCards.isEmpty {
+                    emptyCard
                 }
             }
-            .scrollTargetLayout()
         }
-        .contentMargins(.horizontal, Spacing.xs, for: .scrollContent)
-        .scrollTargetBehavior(.viewAligned(limitBehavior: .always))
+    }
+
+    private var emptyCard: some View {
+        Text("Belum ada kartu yang dipilih")
+            .font(AppFont.bodyRegular).foregroundStyle(Color.textSecondary)
+            .frame(width: 300, height: 475).background(Color.surfaceSecondary)
+            .clipShape(RoundedRectangle(cornerRadius: Radius.sm))
     }
 
     private var details: some View {
         VStack(alignment: .leading, spacing: Spacing.lg) {
-            VStack(spacing: 0) {
-                Divider()
-
-                HStack {
-                    Text("Cerita yang terbuka")
-                        .font(AppFont.bodyRegular)
-                        .foregroundStyle(Color.textPrimary)
-
-                    Spacer()
-
-                    Text("\(session.openCardsCount) Kartu")
-                        .font(AppFont.bodyBold)
-                        .foregroundStyle(Color.textPrimary)
-                }
-                .padding(.vertical, Spacing.md)
-
-                Divider()
+            Divider()
+            HStack {
+                Text("Cerita yang terbuka").font(AppFont.bodyRegular)
+                Spacer()
+                Text("\(session.pickedCards.count) Kartu").font(AppFont.bodyBold)
             }
-
-            Text(session.summary)
-                .font(AppFont.bodyRegular)
-                .foregroundStyle(Color.textPrimary)
-                .fixedSize(horizontal: false, vertical: true)
+            Divider()
+            Text(session.isContinue ? "Kamu masih memiliki topik untuk dibicarakan dari sesi ini. Kamu bisa melanjutkan sesi ini." : "Semua topik di sesi ini sudah selesai dimainkan.")
+                .font(AppFont.bodyRegular).foregroundStyle(Color.textSecondary)
+            if isEditingTitle {
+                DatePicker("Tanggal sesi", selection: $editedDate, displayedComponents: .date)
+                    .font(AppFont.bodyRegular)
+            }
         }
     }
 
-    private func iconButton(
-        systemName: String,
-        action: @escaping () -> Void = { }
-    ) -> some View {
-        Button(action: action) {
-            Image(systemName: systemName)
-                .font(.title3.weight(.medium))
-                .foregroundStyle(Color.textPrimary)
-                .frame(width: 48, height: 48)
-                .background(Color.surfaceSecondary)
-                .clipShape(Circle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(systemName == "xmark" ? "Tutup" : "Edit")
+    private func saveTitle() {
+        let title = editedTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !title.isEmpty { session.title = title }
+        session.createdAt = editedDate
+        try? modelContext.save()
+        isEditingTitle = false
     }
-}
-
-private struct HistorySession: Identifiable, Equatable {
-    let id = UUID()
-    let title: String
-    let date: String
-    let cards: [HistoryQuestion]
-    let openCardsCount: Int
-    let summary: String
-
-    static let samples: [HistorySession] = [
-        HistorySession(
-            title: "Beach trip with her",
-            date: "21 Juli 2026",
-            cards: makeCards(
-                topics: Array(Topics.all.prefix(5))
-            ),
-            openCardsCount: 12,
-            summary: "Kamu masih memiliki topik untuk dibicarakan dari sesi ini, kamu bisa melanjutkan sesi ini."
-        ),
-        HistorySession(
-            title: "Cafe Hangout",
-            date: "13 Juli 2026",
-            cards: makeCards(
-                topics: Array(Topics.all.suffix(5))
-            ),
-            openCardsCount: 15,
-            summary: "Masih banyak yang belum sempat diceritakan. Yuk, main lagi dan lihat ke mana obrolannya membawa kalian."
-        )
-    ]
-
-    private static func makeCards(topics: [TopicModel]) -> [HistoryQuestion] {
-        topics.enumerated().map { index, topic in
-            HistoryQuestion(
-                topicID: topic.id,
-                question: makeQuestion(
-                    topic: topic,
-                    variant: index
-                )
-            )
-        }
-    }
-
-    private static func makeQuestion(topic: TopicModel, variant: Int) -> String {
-        let topicName = topic.name.lowercased()
-
-        switch variant {
-        case 0:
-            return "Jika kamu harus memperkenalkan dirimu tanpa menyebut pekerjaan, jurusan, atau hobi, apa yang akan kamu katakan?"
-        case 1:
-            return "Ceritakan satu hal kecil yang paling sering membuatmu tersenyum belakangan ini."
-        case 2:
-            return "Kalau kamu sedang membahas \(topicName), bagian mana yang paling ingin kamu ceritakan duluan?"
-        case 3:
-            return "Apa pengalaman yang paling membentuk caramu melihat \(topicName)?"
-        default:
-            return "Kalau kalian punya waktu lama untuk membahas \(topicName), hal apa yang ingin kamu buka dulu?"
-        }
-    }
-}
-
-private struct HistoryQuestion: Identifiable, Equatable {
-    let id = UUID()
-    let topicID: Int
-    let question: String
-}
-
-#Preview {
-    HistoryView()
 }

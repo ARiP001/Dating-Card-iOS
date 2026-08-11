@@ -51,7 +51,7 @@ struct CardShufflingView: View {
                 Spacer()
 
                 Text("Letakkan device ini di tempat yang dapat kalian berdua lihat bersama")
-                    .font(AppFont.largeTitleBold)
+                    .font(AppFont.title1Bold)
                     .foregroundStyle(Color.textSecondaryWhite)
                     .multilineTextAlignment(.leading)
                     .padding(.horizontal, 4)

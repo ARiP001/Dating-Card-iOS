@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MainTabView: View {
     @State private var selectedTab: MainTab = .home
+    @AppStorage("requestedMainTab") private var requestedMainTab = MainTab.home.rawValue
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -17,12 +18,14 @@ struct MainTabView: View {
                 }
                 .tag(MainTab.history)
         }
+        .onChange(of: requestedMainTab) { _, value in
+            selectedTab = MainTab(rawValue: value) ?? .home
+        }
     }
 }
 
-private enum MainTab: Hashable {
-    case home
-    case history
+private enum MainTab: String, Hashable {
+    case home, history
 }
 
 #Preview {

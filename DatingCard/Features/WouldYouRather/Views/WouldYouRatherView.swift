@@ -19,6 +19,10 @@ struct WouldYouRatherView: View {
         )
     }
 
+    init(session: SessionModel) {
+        _viewModel = StateObject(wrappedValue: WouldYouRatherViewModel(session: session))
+    }
+
     var body: some View {
         ZStack {
             switch viewModel.screenState {
@@ -63,7 +67,7 @@ struct WouldYouRatherView: View {
                     cards: viewModel.pickedPackCards,
                     selectedCardID: $viewModel.selectedCardID,
                     onConfirm: {
-                        persistSelectedCard()
+                        viewModel.startSelectedTopic()
                     },
                     onDismiss: {
                         dismiss()
@@ -72,9 +76,22 @@ struct WouldYouRatherView: View {
                 .transition(.opacity)
                 .zIndex(2)
 
+            case let .gameplay(topicID):
+                if let session = viewModel.session {
+                    GameplayView(
+                        session: session,
+                        topicID: topicID,
+                        onOpenAnotherPack: {
+                            viewModel.prepareNextPack(in: modelContext)
+                        }
+                    )
+                    .transition(.opacity)
+                    .zIndex(3)
+                }
+
             case .empty:
                 emptyContent
-                    .zIndex(3)
+                    .zIndex(4)
             }
         }
         .animation(
@@ -84,30 +101,22 @@ struct WouldYouRatherView: View {
         .task {
             viewModel.prepareSession(in: modelContext)
         }
+        .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
     }
 
     private var emptyContent: some View {
-        VStack(spacing: 16) {
-            Text("Belum ada kartu untuk topik ini")
-                .font(.title3.bold())
-
-            Text("Coba pilih topik lain dari flow preference.")
-                .font(.body)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
+        AppEmptyState(
+            title: "Belum ada topik yang cocok",
+            message: "Preferensi kalian belum memiliki topik yang sama. Coba mulai sesi baru dan pilih topik yang bisa kalian sepakati bersama.",
+            actionTitle: "Kembali ke Home"
+        ) {
+            dismiss()
         }
-        .padding(24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.bgPrimary.ignoresSafeArea())
     }
 
-    private func persistSelectedCard() {
-        do {
-            try modelContext.save()
-        } catch {
-            print(
-                "Failed to save selected would you rather card: \(error)"
-            )
-        }
-    }
 }
 
 // MARK: - Selection View
@@ -116,6 +125,7 @@ private struct WouldYouRatherSelectionView: View {
     @Binding var selectedCardID: UUID?
     let onConfirm: () -> Void
     let onDismiss: () -> Void
+    @State private var showsExitConfirmation = false
 
     var body: some View {
         ZStack {
@@ -152,6 +162,17 @@ private struct WouldYouRatherSelectionView: View {
                 confirmButton
             }
             .padding(.horizontal, 32)
+
+            if showsExitConfirmation {
+                SessionExitConfirmation(
+                    title: "Keluar dari Pilihan preferences",
+                    message: "Apakah kamu yakin ingin keluar dari halaman ini?",
+                    continueTitle: "Lanjutkan",
+                    exitTitle: "Home",
+                    onContinue: { showsExitConfirmation = false },
+                    onExit: onDismiss
+                )
+            }
         }
     }
 
@@ -162,11 +183,11 @@ private struct WouldYouRatherSelectionView: View {
                 Spacer()
 
                 Button {
-                    onDismiss()
+                    showsExitConfirmation = true
                 } label: {
                     Image(systemName: "xmark")
                         .font(.title3.weight(.medium))
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(Color.textPrimaryBlack)
                         .frame(
                             width: 44,
                             height: 44
@@ -182,13 +203,13 @@ private struct WouldYouRatherSelectionView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Bahas yang mana dulu?")
                     .font(.title2.bold())
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(Color.textPrimary)
 
                 Text(
                     "Diskusikan topik mana, yang ingin kalian bahas bersama."
                 )
                 .font(AppFont.bodyRegular)
-                .foregroundStyle(Color.textSecondary)
+                .foregroundStyle(Color.textPrimary)
                         .fixedSize(
                             horizontal: false,
                             vertical: true

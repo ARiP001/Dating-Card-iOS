@@ -92,9 +92,7 @@ struct TopicOptionCard<Value: Hashable>: View {
         }
 
         return isSelected
-            ? Color.topicColor(
-                for: topicID
-            )
+            ? Color.accentPrimary
             : Color.topicColor(
                 for: topicID
             )
