@@ -9,6 +9,7 @@ import SwiftData
 import SwiftUI
 
 struct WouldYouRatherView: View {
+    @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @StateObject private var viewModel: WouldYouRatherViewModel
 
@@ -115,8 +116,8 @@ struct WouldYouRatherView: View {
 
     private var emptyContent: some View {
         AppEmptyState(
-            title: "Belum ada topik yang cocok",
-            message: "Topik yang kalian pilih belum memiliki preferensi yang sama. Cobalah mulai sesi baru dan pilih topik yang bisa kalian sepakati bersama.",
+            title: "Belum ada topik yang tersedia",
+            message: "Gabungan topik yang kalian pilih sudah dikurangi dengan topik yang belum ingin dibagikan. Coba pilih topik lain untuk memulai sesi.",
             actionTitle: "Kembali ke Home"
         ) {
             dismiss()
@@ -211,9 +212,12 @@ private struct WouldYouRatherSelectionView: View {
             alignment: .leading,
             spacing: 8
         ) {
-            Text("Bahas yang mana dulu?")
-                .font(.title2.bold())
-                .foregroundStyle(.primary)
+            HStack(alignment: .top) {
+                Text("Bahas yang mana dulu?")
+                    .font(.title2.bold())
+                    .foregroundStyle(Color.textPrimary)
+
+                Spacer()
 
                 Button {
                     showsExitConfirmation = true
@@ -233,21 +237,15 @@ private struct WouldYouRatherSelectionView: View {
                 .buttonStyle(.plain)
             }
 
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Bahas yang mana dulu?")
-                    .font(.title2.bold())
-                    .foregroundStyle(Color.textPrimary)
-
-                Text(
-                    "Diskusikan topik mana, yang ingin kalian bahas bersama."
-                )
+            Text(
+                "Diskusikan topik mana, yang ingin kalian bahas bersama."
+            )
                 .font(AppFont.bodyRegular)
                 .foregroundStyle(Color.textPrimary)
-                        .fixedSize(
-                            horizontal: false,
-                            vertical: true
-                        )
-            }
+                .fixedSize(
+                    horizontal: false,
+                    vertical: true
+                )
         }
     }
 
@@ -760,47 +758,30 @@ private extension Array {
     .modelContainer(container)
 }
 
-#Preview("Bahas yang mana dulu?") {
-    @Previewable @State
-    var selectedCardID: UUID?
+private struct WouldYouRatherSelectionPreview: View {
+    @State private var selectedCardID: UUID?
 
-    let container = try! ModelContainer(
-        for:
-            CardModel.self,
-            SessionModel.self,
-        configurations:
-            ModelConfiguration(
-                isStoredInMemoryOnly: true
-            )
-    )
+    private let cards = [
+        CardModel(
+            topicID: Topics.all[0].id,
+            question: "Dummy question"
+        ),
+        CardModel(
+            topicID: Topics.all[1].id,
+            question: "Dummy question"
+        )
+    ]
 
-    let context =
-        container.mainContext
-
-    let randomTopicIDs = Array(
-        Topics.all
-            .shuffled()
-            .prefix(2)
-            .map(\.id)
-    )
-
-    let cards =
-        randomTopicIDs.map { topicID in
-            CardModel(
-                topicID: topicID,
-                question:
-                    "Dummy question for topic \(topicID)"
-            )
-        }
-
-    cards.forEach {
-        context.insert($0)
+    var body: some View {
+        WouldYouRatherSelectionView(
+            cards: cards,
+            selectedCardID: $selectedCardID,
+            onConfirm: {},
+            onDismiss: {}
+        )
     }
+}
 
-    WouldYouRatherSelectionView(
-        cards: cards,
-        selectedCardID: $selectedCardID,
-        onConfirm: {}
-    )
-    .modelContainer(container)
+#Preview("Bahas yang mana dulu?") {
+    WouldYouRatherSelectionPreview()
 }

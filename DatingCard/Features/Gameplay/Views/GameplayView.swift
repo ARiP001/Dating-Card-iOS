@@ -81,8 +81,8 @@ struct GameplayView: View {
 
     private func endState(title: String, message: String, button: String, action: @escaping () -> Void) -> some View {
         VStack(spacing: Spacing.xl) {
-            Spacer(); Text(title).font(AppFont.largeTitleBold).multilineTextAlignment(.center)
-            Text(message).font(AppFont.bodyRegular).foregroundStyle(Color.textSecondary).multilineTextAlignment(.center)
+            Spacer(); Text(title).font(AppFont.title1Bold).multilineTextAlignment(.center)
+            Text(message).font(AppFont.title3Bold).foregroundStyle(Color.textSecondary).multilineTextAlignment(.center)
             CardStackIllustration().frame(height: 280); Spacer()
             AppButton(title: button, action: action)
         }.padding(Spacing.xl)

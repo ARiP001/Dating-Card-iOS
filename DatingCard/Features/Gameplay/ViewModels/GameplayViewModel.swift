@@ -32,9 +32,11 @@ final class GameplayViewModel: ObservableObject {
         guard state == .loading else { return }
 
         do {
-            // Hanya kartu yang belum pernah dimainkan yang ditawarkan.
+            // Kartu boleh dipakai kembali pada sesi baru. Progress dalam
+            // sesi aktif disimpan lewat lastIndex/currentTopicIDs, sedangkan
+            // isPicked hanya menandai kartu yang disimpan ke History.
             let descriptor = FetchDescriptor<CardModel>(
-                predicate: #Predicate { $0.topicID == topicID && !$0.isPicked },
+                predicate: #Predicate { $0.topicID == topicID },
                 sortBy: [SortDescriptor(\CardModel.question)]
             )
 

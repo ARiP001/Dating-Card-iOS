@@ -2,6 +2,7 @@ import SwiftData
 import SwiftUI
 
 struct HistoryView: View {
+    @Environment(\.modelContext) private var modelContext
     @Query(sort: \SessionModel.createdAt, order: .reverse) private var sessions: [SessionModel]
     @State private var selectedSession: SessionModel?
 
@@ -69,20 +70,27 @@ struct HistoryView: View {
 
         sessions[index].title = title
         selectedSession = sessions[index]
+
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed to update session title: \(error)")
+        }
     }
 }
 
 private struct HistorySessionDetailView: View {
-    let session: HistorySession
+    let session: SessionModel
     let onTitleChanged: (String) -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var title: String
     @State private var draftTitle: String
     @State private var isShowingTitleEditor = false
+    @State private var isResumingSession = false
 
     init(
-        session: HistorySession,
+        session: SessionModel,
         onTitleChanged: @escaping (String) -> Void
     ) {
         self.session = session
@@ -101,7 +109,9 @@ private struct HistorySessionDetailView: View {
 
             Spacer(minLength: Spacing.lg)
             if session.isContinue {
-                AppButton(title: "Lanjutkan sesi") { resumeSession = true }
+                AppButton(title: "Lanjutkan sesi") {
+                    isResumingSession = true
+                }
                     .padding(.bottom, Spacing.lg)
             }
         }
@@ -138,6 +148,9 @@ private struct HistorySessionDetailView: View {
         } message: {
             Text("Masukkan judul baru untuk sesi ini.")
         }
+        .navigationDestination(isPresented: $isResumingSession) {
+            WouldYouRatherView(session: session)
+        }
     }
 
     private var questionDeck: some View {
@@ -171,10 +184,6 @@ private struct HistorySessionDetailView: View {
             Divider()
             Text(session.isContinue ? "Kamu masih memiliki topik untuk dibicarakan dari sesi ini. Kamu bisa melanjutkan sesi ini." : "Semua topik di sesi ini sudah selesai dimainkan.")
                 .font(AppFont.bodyRegular).foregroundStyle(Color.textSecondary)
-            if isEditingTitle {
-                DatePicker("Tanggal sesi", selection: $editedDate, displayedComponents: .date)
-                    .font(AppFont.bodyRegular)
-            }
         }
     }
 
@@ -190,71 +199,6 @@ private struct HistorySessionDetailView: View {
         title = newTitle
         onTitleChanged(newTitle)
     }
-}
-
-private struct HistorySession: Identifiable, Equatable {
-    let id = UUID()
-    var title: String
-    let date: String
-    let cards: [HistoryQuestion]
-    let openCardsCount: Int
-    let summary: String
-
-    static let samples: [HistorySession] = [
-        HistorySession(
-            title: "Beach trip with her",
-            date: "21 Juli 2026",
-            cards: makeCards(
-                topics: Array(Topics.all.prefix(5))
-            ),
-            openCardsCount: 12,
-            summary: "Kamu masih memiliki topik untuk dibicarakan dari sesi ini, kamu bisa melanjutkan sesi ini."
-        ),
-        HistorySession(
-            title: "Cafe Hangout",
-            date: "13 Juli 2026",
-            cards: makeCards(
-                topics: Array(Topics.all.suffix(5))
-            ),
-            openCardsCount: 15,
-            summary: "Masih banyak yang belum sempat diceritakan. Yuk, main lagi dan lihat ke mana obrolannya membawa kalian."
-        )
-    ]
-
-    private static func makeCards(topics: [TopicModel]) -> [HistoryQuestion] {
-        topics.enumerated().map { index, topic in
-            HistoryQuestion(
-                topicID: topic.id,
-                question: makeQuestion(
-                    topic: topic,
-                    variant: index
-                )
-            )
-        }
-    }
-
-    private static func makeQuestion(topic: TopicModel, variant: Int) -> String {
-        let topicName = topic.name.lowercased()
-
-        switch variant {
-        case 0:
-            return "Jika kamu harus memperkenalkan dirimu tanpa menyebut pekerjaan, jurusan, atau hobi, apa yang akan kamu katakan?"
-        case 1:
-            return "Ceritakan satu hal kecil yang paling sering membuatmu tersenyum belakangan ini."
-        case 2:
-            return "Kalau kamu sedang membahas \(topicName), bagian mana yang paling ingin kamu ceritakan duluan?"
-        case 3:
-            return "Apa pengalaman yang paling membentuk caramu melihat \(topicName)?"
-        default:
-            return "Kalau kalian punya waktu lama untuk membahas \(topicName), hal apa yang ingin kamu buka dulu?"
-        }
-    }
-}
-
-private struct HistoryQuestion: Identifiable, Equatable {
-    let id = UUID()
-    let topicID: Int
-    let question: String
 }
 
 #Preview {

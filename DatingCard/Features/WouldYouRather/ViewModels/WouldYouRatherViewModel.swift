@@ -15,9 +15,7 @@ final class WouldYouRatherViewModel: ObservableObject {
         case picking
         case choosing
         case gameplay(Int)
-        /// Topik dipilih, tapi kartu pertanyaan yang belum pernah dimainkan
-        /// (`isPicked == false`) untuk topik itu sudah habis. Membawa nama
-        /// topik untuk ditampilkan di wording empty state.
+        /// Topik dipilih, tetapi katalog pertanyaannya belum tersedia.
         case topicExhausted(String)
         case empty
     }
@@ -66,31 +64,26 @@ final class WouldYouRatherViewModel: ObservableObject {
         }
 
         do {
-            // Kasus 1: memang tidak ada topik yang cocok sama sekali dari
-            // preferensi (union - hated topics kosong).
+            // Pool final selalu merupakan union pilihan kedua user setelah
+            // seluruh hated topics dikurangi.
             guard !topicIDs.isEmpty else {
                 screenState = .empty
                 return
             }
 
-            // Kasus 2: topik cocok ada, tapi semua kartunya sudah pernah
-            // dimainkan (isPicked == true di semua topik). Dicek DULU
-            // sebelum bikin SessionModel, supaya sesi kosong tidak nyangkut
-            // di history — kalau memang habis, wording-nya juga beda dari
-            // "belum ada topik yang cocok" (pakai .topicExhausted).
+            // `isPicked` menandai kartu yang disimpan ke History. Status itu
+            // tidak boleh menghapus kartu dari sesi baru karena berlaku
+            // lintas SessionModel.
             let allCards = try modelContext.fetch(FetchDescriptor<CardModel>())
-            let hasAnyAvailableCard = allCards.contains {
-                topicIDs.contains($0.topicID) && !$0.isPicked
+            let hasAnyCard = allCards.contains {
+                topicIDs.contains($0.topicID)
             }
 
-            guard hasAnyAvailableCard else {
+            guard hasAnyCard else {
                 if topicIDs.count == 1, let onlyTopicID = topicIDs.first {
                     let name = Topics.all.first { $0.id == onlyTopicID }?.name ?? "topik ini"
                     screenState = .topicExhausted(name)
                 } else {
-                    // Lebih dari 1 topik gabungan tapi semuanya habis —
-                    // tetap dianggap "tidak ada topik yang cocok" untuk
-                    // dimainkan, karena tidak ada satupun kartu tersisa.
                     screenState = .empty
                 }
                 return
@@ -125,9 +118,6 @@ final class WouldYouRatherViewModel: ObservableObject {
                 modelContext: modelContext
             )
 
-            // Karena hasAnyAvailableCard sudah dipastikan true di atas,
-            // pickedCount seharusnya tidak pernah 0 di titik ini. Ini
-            // cuma pengaman terakhir kalau ada race condition data.
             if pickedCount == 0 {
                 screenState = .empty
             }
@@ -196,10 +186,7 @@ final class WouldYouRatherViewModel: ObservableObject {
 
     // MARK: - Gameplay Entry
 
-    /// Dipanggil sebelum masuk `.gameplay(topicID)`. Mengecek dulu apakah
-    /// kartu yang belum dimainkan (`isPicked == false`) untuk topik itu
-    /// masih tersedia (1-5 kartu). Kalau sudah habis (0 kartu tersisa),
-    /// tampilkan `.topicExhausted` alih-alih masuk ke gameplay.
+    /// Memastikan katalog kartu untuk topik tersedia sebelum gameplay.
     func enterGameplayIfAvailable(topicID: Int, in modelContext: ModelContext) {
         let remainingCount = remainingCardCount(for: topicID, in: modelContext)
 
@@ -213,7 +200,7 @@ final class WouldYouRatherViewModel: ObservableObject {
 
     private func remainingCardCount(for topicID: Int, in modelContext: ModelContext) -> Int {
         let descriptor = FetchDescriptor<CardModel>(
-            predicate: #Predicate { $0.topicID == topicID && !$0.isPicked }
+            predicate: #Predicate { $0.topicID == topicID }
         )
         return (try? modelContext.fetchCount(descriptor)) ?? 0
     }
@@ -227,7 +214,6 @@ final class WouldYouRatherViewModel: ObservableObject {
         modelContext: ModelContext
     ) throws -> Int {
         let allCards = try modelContext.fetch(FetchDescriptor<CardModel>())
-            .filter { !$0.isPicked }
 
         // MARK: - 1. Tentukan pickedPackCards (2 Kartu Kandidat)
         if topicIDs.count == 1, let onlyTopicID = topicIDs.first {
@@ -279,7 +265,7 @@ final class WouldYouRatherViewModel: ObservableObject {
             currentPackCards = newCurrentPackCards.shuffled()
         }
 
-        animationTopicIDs = Topics.all.map(\.id).shuffled()
+        animationTopicIDs = session.currentTopicIDs.shuffled()
         selectedCardID = nil
 
         if pickedPackCards.count == 1, let onlyCard = pickedPackCards.first {
