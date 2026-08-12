@@ -208,8 +208,8 @@ private struct WouldYouRatherSelectionView: View {
             alignment: .leading,
             spacing: 8
         ) {
-            Text("Pilih Topik yang Ingin Dibahas")
-                .font(.title2.bold())
+            Text("Mau bahas yang mana nih?")
+                .font(AppFont.title2Bold)
                 .foregroundStyle(Color.textPrimary)
 
             Text(

@@ -46,7 +46,7 @@ struct QuestionCard: View {
 #Preview {
     QuestionCard(
         question: "Jika kamu harus memperkenalkan dirimu tanpa menyebut pekerjaan, jurusan, atau hobi, apa yang akan kamu katakan?",
-        topicID: 1
+        topicID: 2
     )
     .padding(Spacing.lg)
     .background(Color.bgPrimary)

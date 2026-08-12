@@ -250,7 +250,7 @@ struct GameplayView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Image(systemName: "arrow.right")
                     .font(.title3.weight(.semibold))
-                    .foregroundStyle(Color.accentPrimary)
+                    .foregroundStyle(Color.green)
 
                 Text("Jika topik telah didiskusikan")
                     .font(AppFont.bodyRegular)
@@ -341,7 +341,6 @@ struct GameplayView: View {
 }
 
 // MARK: - Gameplay Swipe Card
-
 private struct GameplaySwipeCard: View {
     let card: CardModel
     let swipeRequest: SwipeRequest?
@@ -383,7 +382,7 @@ private struct GameplaySwipeCard: View {
 
     @ViewBuilder
     private var feedbackIcon: some View {
-        if abs(offset.width) > 20 {
+        
             Image(
                 systemName:
                     offset.width > 0
@@ -392,7 +391,7 @@ private struct GameplaySwipeCard: View {
             )
             .font(.title.bold())
             .foregroundStyle(.white)
-            .frame(width: 52, height: 52)
+            .frame(width: 60, height: 60)
             .background(
                 offset.width > 0
                     ? Color.green
@@ -405,7 +404,11 @@ private struct GameplaySwipeCard: View {
                     1
                 )
             )
-        }
+            .offset(
+                x: offset.width > 0 ? 120 : -120
+                    )
+
+        
     }
 
     private func endDrag(_ translation: CGSize) {

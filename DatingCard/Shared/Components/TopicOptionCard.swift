@@ -40,7 +40,7 @@ struct TopicOptionCard<Value: Hashable>: View {
                             )
                     }
                     Text(title)
-                        .font(AppFont.bodyBold)
+                        .font(AppFont.title3Bold)
                         .foregroundStyle(
                             foregroundColor
                         )

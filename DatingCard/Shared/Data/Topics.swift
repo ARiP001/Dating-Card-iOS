@@ -65,4 +65,6 @@ enum Topics {
         Group(id: "emotional", name: "Emotional", topicIDs: 19...23),
         Group(id: "future", name: "Future", topicIDs: 24...25)
     ]
+    
+    static let iceBreaking = TopicModel(id: 0, name: "Ice Breaking")
 }

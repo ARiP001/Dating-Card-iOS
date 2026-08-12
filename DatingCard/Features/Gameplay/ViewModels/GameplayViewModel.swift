@@ -137,6 +137,89 @@ final class GameplayViewModel: ObservableObject {
 
         isResolvingSwipe = false
     }
+//    
+//    func prepare(in context: ModelContext) {
+//        guard state == .loading else { return }
+//
+//        do {
+//            let descriptor = FetchDescriptor<CardModel>(
+//                predicate: #Predicate { $0.topicID == topicID },
+//                sortBy: [SortDescriptor(\CardModel.question)]
+//            )
+//
+//            let fetchedCards = try context.fetch(descriptor)
+//            var sessionCards = Array(fetchedCards.prefix(5))
+//
+//            if let iceBreaker = IceBreakings.createIceBreakingCards().shuffled().first {
+//                sessionCards.append(iceBreaker)
+//            }
+//
+//            cards = sessionCards
+//
+//            currentIndex = min(
+//                max(session.lastIndex ?? 0, 0),
+//                max(cards.count - 1, 0)
+//            )
+//
+//            state = cards.isEmpty ? .loadFailed : .playing
+//
+//        } catch {
+//            state = .loadFailed
+//            print("Failed to load gameplay cards:", error)
+//        }
+//    }
+//
+//    func recordSwipe(
+//        _ direction: SwipeDirection,
+//        in context: ModelContext
+//    ) {
+//        guard
+//            state == .playing,
+//            !isResolvingSwipe,
+//            let card = currentCard
+//        else {
+//            return
+//        }
+//
+//        isResolvingSwipe = true
+//
+//        let isIceBreakingCard = card.topicID == 0
+//
+//        if direction == .right && !isIceBreakingCard {
+//            card.isPicked = true
+//
+//            if !session.pickedCards.contains(where: { $0.id == card.id }) {
+//                session.pickedCards.append(card)
+//            }
+//        }
+//
+//        if currentIndex == cards.count - 1 {
+//            session.currentTopicIDs.removeAll {
+//                $0 == topicID
+//            }
+//
+//            session.lastIndex = 4
+//            session.isContinue = !session.currentTopicIDs.isEmpty
+//
+//            state = session.currentTopicIDs.isEmpty
+//                ? .sessionFinished
+//                : .packFinished
+//
+//        } else {
+//            currentIndex += 1
+//            session.lastIndex = currentIndex
+//        }
+//
+//        do {
+//            try context.save()
+//        } catch {
+//            print(
+//                "Failed to save gameplay progress: \(error)"
+//            )
+//        }
+//
+//        isResolvingSwipe = false
+//    }
 
     func keepSessionAvailable(in context: ModelContext) {
         guard !session.currentTopicIDs.isEmpty else {

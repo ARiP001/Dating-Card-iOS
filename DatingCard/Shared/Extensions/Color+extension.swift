@@ -99,6 +99,9 @@ extension Color {
 
 // MARK: - Card Colors
 extension Color {
+    // MARK: ICE BREAKING
+    static let cardIceBreaking = Color(hex: "#BBE3FF")
+    
     // MARK: Identity
     static let cardAboutMe = Color(hex: "#E89A3E")
     static let cardThingsILove = Color(hex: "#F0AC62")
@@ -113,10 +116,10 @@ extension Color {
     static let cardWorkNAmbition = Color(hex: "#E7EFBF")
 
     // MARK: Values
-    static let cardWhatMattersToMe = Color(hex: "#AD7EFE")
-    static let cardRightNWrong = Color(hex: "#BE95FF")
-    static let cardMeaningFulLife = Color(hex: "#CEACFF")
-    static let cardBeliefsNWorldview = Color(hex: "#DDC4FF")
+    static let cardWhatMattersToMe = Color(hex: "#5070E2")
+    static let cardRightNWrong = Color(hex: "#7788E8")
+    static let cardMeaningFulLife = Color(hex: "#98A1EE")
+    static let cardBeliefsNWorldview = Color(hex: "#B7BBF3")
 
     // MARK: Relationship
     static let cardFirstConnections = Color(hex: "#C94D75")
@@ -138,6 +141,8 @@ extension Color {
 
     static func topicColor(for topicID: Int) -> Color {
         switch topicID {
+        case 0:
+                return .cardIceBreaking
         case 1:
             return .cardAboutMe
         case 2:
