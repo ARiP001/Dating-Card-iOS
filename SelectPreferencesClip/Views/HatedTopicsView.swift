@@ -44,7 +44,7 @@ struct HatedTopicsView: View {
 
                     header
 
-                    VStack(spacing: Spacing.md) {
+                    VStack(spacing: Spacing.sm) {
                         ForEach(Topics.groups) { group in
                             let topics = group.topics.filter {
                                 !selectedTopicIDs.contains($0.id)

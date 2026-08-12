@@ -38,21 +38,34 @@ struct PreferencesSentView: View {
     @State private var planeRotation = 0.0
 
     var body: some View {
-        ZStack(alignment: .topTrailing) {
-            Color.bgPrimary
+        ZStack {
+            LinearGradient(
+                stops: [
+                    .init(color: .bgPrimary, location: 0),
+                    .init(color: .bgPrimary, location: 0.38),
+                    .init(
+                        color: .brandPrimaryRosePink.opacity(0.42),
+                        location: 0.68
+                    ),
+                    .init(
+                        color: .brandPrimaryRosePink,
+                        location: 1
+                    )
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
                 .ignoresSafeArea()
 
-            Circle()
-                .fill(Color.brandPrimaryRosePink.opacity(0.25))
-                .frame(width: 360, height: 360)
-                .blur(radius: 80)
-                .offset(x: 120, y: -120)
-                .allowsHitTesting(false)
-                .accessibilityHidden(true)
+            ConcentricDashedCirclesView(
+                yOffset: 30,
+                strokeColor: Color.bgCard.opacity(0.18),
+                dashPattern: [2, 9]
+            )
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
 
             if isShowingSentContent {
-                sentOrbits
-
                 sentContent
                     .transition(
                         .opacity.combined(
@@ -97,58 +110,58 @@ struct PreferencesSentView: View {
     }
 
     private var sentContent: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Spacer()
+        GeometryReader { geometry in
+            VStack(alignment: .leading, spacing: 0) {
+                VStack(alignment: .leading, spacing: Spacing.xl) {
+                    VStack(alignment: .leading, spacing: Spacing.sm) {
+                        Text("Preferensi\nTerkirim")
+                            .font(AppFont.title1Bold)
+                            .foregroundStyle(Color.textPrimary)
 
-            VStack(alignment: .leading, spacing: Spacing.md) {
-                Text("Preferensi Terkirim")
-                    .font(AppFont.largeTitleBold)
-                    .foregroundStyle(Color.textPrimary)
-
-                Text(
-                    "Pilihanmu sudah berhasil dikirim ke perangkat utama."
-                )
-                .font(AppFont.title3Regular)
-                .foregroundStyle(Color.textSecondary)
-                .fixedSize(horizontal: false, vertical: true)
-            }
-
-            Spacer()
-
-            Text(
-                "Kamu sekarang bisa menutup App Clip ini dan melanjutkan permainan di perangkat utama."
-            )
-            .font(AppFont.bodyRegular)
-            .foregroundStyle(Color.textSecondary)
-            .fixedSize(horizontal: false, vertical: true)
-            .padding(.bottom, Spacing.xl)
-        }
-        .padding(.horizontal, Spacing.xl)
-        .accessibilityElement(children: .combine)
-    }
-
-    private var sentOrbits: some View {
-        ZStack {
-            ForEach(0..<5, id: \.self) { index in
-                let diameter = 420 - (CGFloat(index) * 54)
-
-                Circle()
-                    .stroke(
-                        Color.brandPrimaryRosePink.opacity(
-                            0.16 - (Double(index) * 0.02)
-                        ),
-                        style: StrokeStyle(
-                            lineWidth: 1.5,
-                            lineCap: .round,
-                            dash: [2, 10]
+                        Text(
+                            "Pilihanmu sudah berhasil dikirim ke perangkat utama."
                         )
+                        .font(AppFont.bodyRegular)
+                        .foregroundStyle(Color.textPrimary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    Text(
+                        "Kamu sekarang bisa menutup App Clip ini dan melanjutkan permainan di perangkat utama."
                     )
-                    .frame(width: diameter, height: diameter)
+                    .font(AppFont.bodyRegular)
+                    .foregroundStyle(Color.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer()
+//
+//                Button { } label: {
+//                    Text("Close")
+//                        .font(AppFont.headlineSemibold)
+//                        .foregroundStyle(Color.brandPrimaryRosePink)
+//                        .frame(maxWidth: .infinity)
+//                        .frame(height: 56)
+//                        .background(Color.bgCard)
+//                        .clipShape(Capsule())
+//                        .shadow(
+//                            color: Color.textPrimary.opacity(0.1),
+//                            radius: 8,
+//                            y: 4
+//                        )
+//                }
+//                .buttonStyle(.plain)
+//                .accessibilityHint(
+//                    "Tutup App Clip dari app switcher untuk kembali ke perangkat utama"
+//                )
             }
+            .padding(.horizontal, Spacing.xl)
+            .padding(
+                .top,
+                max(Spacing.xxl, geometry.size.height * 0.20)
+            )
+            .padding(.bottom, Spacing.lg)
         }
-        .offset(x: 150, y: 500)
-        .allowsHitTesting(false)
-        .accessibilityHidden(true)
     }
 
     private func playSendAnimation() async {

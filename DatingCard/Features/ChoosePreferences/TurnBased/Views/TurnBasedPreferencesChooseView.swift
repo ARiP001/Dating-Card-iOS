@@ -39,7 +39,7 @@ struct TurnBasedPreferencesChooseView: View {
                 ) {
                     header
 
-                    VStack(spacing: Spacing.md) {
+                    VStack(spacing: Spacing.sm) {
                         ForEach(Topics.groups) { group in
                             BigTopic(
                                 title: group.name,
@@ -56,25 +56,23 @@ struct TurnBasedPreferencesChooseView: View {
             }
             .scrollBounceBehavior(.basedOnSize)
         }
-        .overlay(alignment: .bottom) {
-            VStack {
-                AppButton(
-                    title: "Lanjut",
-                    isEnabled: !selectedTopicIDs.isEmpty,
-                    accentColor: accentColor,
-                    action: onContinue
-                )
-                .padding(.horizontal, Spacing.md)
-            }
-            .padding(Spacing.md)
-            .frame(maxWidth: .infinity)
-            .glassEffect(
-                .regular,
-                in: RoundedRectangle(
-                    cornerRadius: Radius.xl
-                )
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            AppButton(
+                title: "Lanjut",
+                variant: selectedTopicIDs.isEmpty
+                    ? .secondary
+                    : .primary,
+                isEnabled: !selectedTopicIDs.isEmpty,
+                accentColor: accentColor,
+                showsBorder: false,
+                disabledOpacity: 1,
+                action: onContinue
             )
-            .padding(.horizontal, Spacing.md)
+            .padding(.horizontal, Spacing.xl)
+            .padding(.top, Spacing.md)
+            .padding(.bottom, Spacing.sm)
+            .frame(maxWidth: .infinity)
+            .background(.ultraThinMaterial)
         }
     }
 

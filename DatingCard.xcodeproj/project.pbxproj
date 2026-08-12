@@ -57,6 +57,7 @@
 				Shared/Components/AppButton.swift,
 				Shared/Components/AppLoadingView.swift,
 				Shared/Components/BigTopic.swift,
+				Shared/Components/ConcentricDashedCirclesView.swift,
 				Shared/Components/TopicChip.swift,
 				Shared/Data/Topics.swift,
 				"Shared/Extensions/Color+extension.swift",
