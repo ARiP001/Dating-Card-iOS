@@ -1,10 +1,3 @@
-//
-//  GameplayViewModel.swift
-//  DatingCard
-//
-//  Created by Made Vidyatma Adhi Krisna on 12/08/26.
-//
-
 import Foundation
 import Combine
 import SwiftData
@@ -64,9 +57,6 @@ final class GameplayViewModel: ObservableObject {
         guard state == .loading else { return }
 
         do {
-            // Kartu boleh dipakai kembali pada sesi baru. Progress dalam
-            // sesi aktif disimpan lewat lastIndex/currentTopicIDs, sedangkan
-            // isPicked hanya menandai kartu yang disimpan ke History.
             let descriptor = FetchDescriptor<CardModel>(
                 predicate: #Predicate { $0.topicID == topicID },
                 sortBy: [SortDescriptor(\CardModel.question)]
@@ -74,8 +64,6 @@ final class GameplayViewModel: ObservableObject {
 
             let fetchedCards = try context.fetch(descriptor)
 
-            // Maksimal 5 kartu per sesi pack, tapi tersedia 1-5 kartu pun
-            // tetap dianggap valid untuk dimainkan (bukan cuma tepat 5).
             var sessionCards = Array(fetchedCards.prefix(5))
 
             if let iceBreakingCard = IceBreakings.card(
@@ -143,6 +131,9 @@ final class GameplayViewModel: ObservableObject {
             session.lastIndex = currentIndex
         }
 
+        // Memperbarui waktu agar query di HistoryView otomatis menarik sesi ini ke posisi paling atas
+        session.createdAt = Date()
+
         do {
             try context.save()
         } catch {
@@ -153,12 +144,15 @@ final class GameplayViewModel: ObservableObject {
 
         isResolvingSwipe = false
     }
+
     func keepSessionAvailable(in context: ModelContext) {
         guard !session.currentTopicIDs.isEmpty else {
             return
         }
 
         session.isContinue = true
+        // Pastikan posisi tetap di atas jika pengguna keluar di pertengahan sesi
+        session.createdAt = Date()
         try? context.save()
     }
 }

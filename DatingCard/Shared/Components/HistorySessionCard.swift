@@ -1,8 +1,3 @@
-//
-//  HistorySessionCard.swift
-//  DatingCard
-//
-
 import SwiftUI
 
 struct HistorySessionCard: View {
@@ -30,7 +25,7 @@ struct HistorySessionCard: View {
                         .lineLimit(1)
                         .padding(.horizontal, Spacing.md)
                         .padding(.vertical, Spacing.sm)
-                        .frame(minWidth:100 ,maxWidth: .infinity)
+                        .frame(minWidth: 100, maxWidth: .infinity, alignment: .leading)
                         .background(Color.neutralDarkCharcoal.opacity(0.18))
                         .clipShape(Capsule())
                 }
@@ -39,12 +34,14 @@ struct HistorySessionCard: View {
                 VStack(alignment: .trailing, spacing: Spacing.sm) {
                     Text("Belum Selesai")
                         .font(AppFont.headlineSemibold)
-
+                   Spacer()
                     Text(date)
                         .font(AppFont.caption1Regular)
+                        .foregroundStyle(Color.bgCard.opacity(0.8))
+                        .multilineTextAlignment(.trailing)
                 }
                 .foregroundStyle(Color.bgCard)
-                .lineLimit(1)
+                // Hapus lineLimit(1) di sini agar tanggal yang panjang bisa menyesuaikan jika diperlukan
             }
             .frame(maxWidth: .infinity, alignment: .topLeading)
             .padding(Spacing.lg)
@@ -55,16 +52,4 @@ struct HistorySessionCard: View {
         .accessibilityElement(children: .combine)
         .accessibilityHint("Buka detail sesi")
     }
-}
-
-#Preview {
-    VStack(spacing: Spacing.sm) {
-        HistorySessionCard(
-            title: "Beach trip with her",
-            lastTopic: "What Matters To Me",
-            date: "21-7-2026"
-        ) { }
-    }
-    .padding(Spacing.md)
-    .background(Color.bgPrimary)
 }

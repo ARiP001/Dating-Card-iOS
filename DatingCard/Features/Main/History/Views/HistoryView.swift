@@ -19,7 +19,7 @@ struct HistoryView: View {
         NavigationStack {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: Spacing.md) {
-                    Text("Kumpulan Ceritamu")
+                    Text("Riwayat Permainan")
                         .font(AppFont.title2Bold)
                         .foregroundStyle(Color.textPrimary)
                         .padding(.bottom, Spacing.sm)
@@ -102,12 +102,9 @@ struct HistoryView: View {
     }
 
     private func formattedDate(_ date: Date) -> String {
-        let components = Calendar.current.dateComponents(
-            [.day, .month, .year],
-            from: date
-        )
-
-        return "\(components.day ?? 0)-\(components.month ?? 0)-\(components.year ?? 0)"
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd-MM-yyyy HH:mm"
+        return formatter.string(from: date)
     }
 
     private func updateTitle(
@@ -205,36 +202,43 @@ private struct HistorySessionDetailView: View {
     }
 
     private var questionDeck: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            LazyHStack(spacing: Spacing.md) {
-                ForEach(session.pickedCards, id: \.id) { card in
-                    QuestionCard(question: card.question, topicID: card.topicID)
+        Group {
+            if session.pickedCards.isEmpty {
+                VStack(spacing: Spacing.md) {
+                    Image("kartuHabis")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 300, height: 300)
                 }
-                if session.pickedCards.isEmpty {
-                    emptyCard
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, Spacing.xl)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    LazyHStack(spacing: Spacing.md) {
+                        ForEach(session.pickedCards, id: \.id) { card in
+                            QuestionCard(question: card.question, topicID: card.topicID)
+                        }
+                    }
                 }
             }
         }
-    }
-
-    private var emptyCard: some View {
-        Text("Belum ada kartu yang dipilih")
-            .font(AppFont.bodyRegular).foregroundStyle(Color.textSecondary)
-            .frame(width: 300, height: 475).background(Color.surfaceSecondary)
-            .clipShape(RoundedRectangle(cornerRadius: Radius.sm))
     }
 
     private var details: some View {
         VStack(alignment: .leading, spacing: Spacing.lg) {
             Divider()
             HStack {
-                Text("Cerita yang terbuka").font(AppFont.bodyRegular)
+                Text(session.pickedCards.isEmpty ? "Belum ada kartu yang sudah dibahas pada sesi ini." : "Sudah terpilih dan dibicarakan : ")
+                    .font(AppFont.bodyRegular)
                 Spacer()
-                Text("\(session.pickedCards.count) Kartu").font(AppFont.bodyBold)
+                if !session.pickedCards.isEmpty {
+                    Text("\(session.pickedCards.count) Kartu")
+                        .font(AppFont.bodyBold)
+                }
             }
             Divider()
             Text(session.isContinue ? "Kamu masih memiliki topik untuk dibicarakan dari sesi ini. Kamu bisa melanjutkan sesi ini." : "Semua topik di sesi ini sudah selesai dimainkan.")
-                .font(AppFont.bodyRegular).foregroundStyle(Color.textSecondary)
+                .font(AppFont.bodyRegular).foregroundStyle(Color.textPrimary)
         }
     }
 
