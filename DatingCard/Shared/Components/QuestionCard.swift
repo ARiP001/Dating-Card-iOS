@@ -10,7 +10,7 @@ struct QuestionCard: View {
     let topicID: Int
     var showsQuestion = true
     var width: CGFloat = 300
-    var height: CGFloat = 475
+    var height: CGFloat = 464
 
     var body: some View {
         ZStack(alignment: .topLeading) {
