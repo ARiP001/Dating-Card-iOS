@@ -2,7 +2,6 @@
 //  QRPreferencesChooseView.swift
 //  DatingCard
 //
-
 import SwiftUI
 
 struct QRPreferencesChooseView: View {
@@ -11,12 +10,36 @@ struct QRPreferencesChooseView: View {
     let onContinue: () -> Void
 
     var body: some View {
-        VStack(spacing: 0) {
+        ZStack(alignment: .topTrailing) {
+            Color.bgPrimary
+                .ignoresSafeArea()
+
+            Circle()
+                .fill(
+                    Color.accentDustyMauve.opacity(0.25)
+                )
+                .frame(
+                    width: 360,
+                    height: 360
+                )
+                .blur(radius: 80)
+                .offset(
+                    x: 120,
+                    y: -120
+                )
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+
             ScrollView {
-                VStack(alignment: .leading, spacing: Spacing.xl) {
+                VStack(
+                    alignment: .leading,
+                    spacing: Spacing.xl
+                ) {
                     header
 
-                    TopicFlowLayout(spacing: Spacing.sm) {
+                    TopicFlowLayout(
+                        spacing: Spacing.sm
+                    ) {
                         ForEach(Topics.all) { topic in
                             TopicChip(
                                 title: topic.name,
@@ -28,34 +51,52 @@ struct QRPreferencesChooseView: View {
                     }
                 }
                 .padding(.horizontal, Spacing.xl)
-//                .padding(.top, Spacing.xxl)
-                .padding(.bottom, Spacing.lg)
+                .padding(.top, Spacing.md)
+                .padding(.bottom, 120)
             }
             .scrollBounceBehavior(.basedOnSize)
-
-            AppButton(
-                title: "Lanjut",
-                isEnabled: !selectedTopicIDs.isEmpty,
-                action: onContinue
-            )
-            .padding(.horizontal, Spacing.xl)
-            .padding(.vertical, Spacing.lg)
         }
-        .background(Color.bgPrimary.ignoresSafeArea())
+        .overlay(alignment: .bottom) {
+            VStack {
+                AppButton(
+                    title: "Lanjut",
+                    isEnabled: !selectedTopicIDs.isEmpty,
+                    action: onContinue
+                )
+                .padding(.horizontal, Spacing.md)
+            }
+            .padding(Spacing.md)
+            .frame(maxWidth: .infinity)
+            .glassEffect(
+                .regular,
+                in: RoundedRectangle(
+                    cornerRadius: Radius.xl
+                )
+            )
+            .padding(.horizontal, Spacing.md)
+        }
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text("Apa yang ingin kamu ketahui\ntentang satu sama lain?")
-                .font(AppFont.title3Bold)
-                .foregroundStyle(Color.textPrimary)
+        VStack(
+            alignment: .leading,
+            spacing: Spacing.sm
+        ) {
+            Text(
+                "Apa yang ingin kamu ketahui\ntentang satu sama lain?"
+            )
+            .font(AppFont.title3Bold)
+            .foregroundStyle(Color.textPrimary)
 
             Text(
                 "Pilihanmu akan jadi referensi topik pertanyaan untuk obrolan kalian nanti."
             )
             .font(AppFont.bodyRegular)
             .foregroundStyle(Color.textSecondary)
-            .fixedSize(horizontal: false, vertical: true)
+            .fixedSize(
+                horizontal: false,
+                vertical: true
+            )
         }
     }
 
@@ -76,14 +117,17 @@ struct TopicFlowLayout: Layout {
         subviews: Subviews,
         cache: inout ()
     ) -> CGSize {
-        let availableWidth = proposal.width ?? .greatestFiniteMagnitude
+        let availableWidth =
+            proposal.width ?? .greatestFiniteMagnitude
+
         var currentX: CGFloat = 0
         var currentY: CGFloat = 0
         var rowHeight: CGFloat = 0
         var contentWidth: CGFloat = 0
 
         for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
+            let size =
+                subview.sizeThatFits(.unspecified)
 
             if currentX > 0,
                currentX + size.width > availableWidth {
@@ -92,14 +136,23 @@ struct TopicFlowLayout: Layout {
                 rowHeight = 0
             }
 
-            contentWidth = max(contentWidth, currentX + size.width)
+            contentWidth = max(
+                contentWidth,
+                currentX + size.width
+            )
+
             currentX += size.width + spacing
-            rowHeight = max(rowHeight, size.height)
+            rowHeight = max(
+                rowHeight,
+                size.height
+            )
         }
 
         return CGSize(
-            width: proposal.width ?? contentWidth,
-            height: currentY + rowHeight
+            width:
+                proposal.width ?? contentWidth,
+            height:
+                currentY + rowHeight
         )
     }
 
@@ -114,7 +167,8 @@ struct TopicFlowLayout: Layout {
         var rowHeight: CGFloat = 0
 
         for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
+            let size =
+                subview.sizeThatFits(.unspecified)
 
             if currentX > bounds.minX,
                currentX + size.width > bounds.maxX {
@@ -124,7 +178,10 @@ struct TopicFlowLayout: Layout {
             }
 
             subview.place(
-                at: CGPoint(x: currentX, y: currentY),
+                at: CGPoint(
+                    x: currentX,
+                    y: currentY
+                ),
                 anchor: .topLeading,
                 proposal: ProposedViewSize(
                     width: size.width,
@@ -133,11 +190,27 @@ struct TopicFlowLayout: Layout {
             )
 
             currentX += size.width + spacing
-            rowHeight = max(rowHeight, size.height)
+            rowHeight = max(
+                rowHeight,
+                size.height
+            )
         }
     }
 }
 
+#Preview {
+    @Previewable @State
+    var selectedTopicIDs: Set<Int> = [
+        2,
+        7,
+        19
+    ]
+
+    QRPreferencesChooseView(
+        selectedTopicIDs: $selectedTopicIDs,
+        onContinue: { }
+    )
+}
 //#Preview {
 //    @Previewable @State var selectedTopicIDs: Set<Int> = [2, 7, 19]
 //

@@ -17,6 +17,7 @@ struct MainTabView: View {
                 }
                 .tag(MainTab.history)
         }
+        .tint(Color.accentDustyMauve)
     }
 }
 

@@ -11,12 +11,36 @@ struct TurnBasedPreferencesChooseView: View {
     let onContinue: () -> Void
 
     var body: some View {
-        VStack(spacing: 0) {
+        ZStack(alignment: .topTrailing) {
+            Color.bgPrimary
+                .ignoresSafeArea()
+
+            Circle()
+                .fill(
+                    Color.accentDustyMauve.opacity(0.25)
+                )
+                .frame(
+                    width: 360,
+                    height: 360
+                )
+                .blur(radius: 80)
+                .offset(
+                    x: 120,
+                    y: -120
+                )
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+
             ScrollView {
-                VStack(alignment: .leading, spacing: Spacing.xl) {
+                VStack(
+                    alignment: .leading,
+                    spacing: Spacing.xl
+                ) {
                     header
 
-                    TurnBasedTopicFlowLayout(spacing: Spacing.sm) {
+                    TurnBasedTopicFlowLayout(
+                        spacing: Spacing.sm
+                    ) {
                         ForEach(Topics.all) { topic in
                             TopicChip(
                                 title: topic.name,
@@ -29,33 +53,51 @@ struct TurnBasedPreferencesChooseView: View {
                 }
                 .padding(.horizontal, Spacing.xl)
                 .padding(.top, Spacing.md)
-                .padding(.bottom, Spacing.lg)
+                .padding(.bottom, 120)
             }
             .scrollBounceBehavior(.basedOnSize)
-
-            AppButton(
-                title: "Lanjut",
-                isEnabled: !selectedTopicIDs.isEmpty,
-                action: onContinue
-            )
-            .padding(.horizontal, Spacing.xl)
-            .padding(.vertical, Spacing.lg)
         }
-        .background(Color.bgPrimary.ignoresSafeArea())
+        .overlay(alignment: .bottom) {
+            VStack {
+                AppButton(
+                    title: "Lanjut",
+                    isEnabled: !selectedTopicIDs.isEmpty,
+                    action: onContinue
+                )
+                .padding(.horizontal, Spacing.md)
+            }
+            .padding(Spacing.md)
+            .frame(maxWidth: .infinity)
+            .glassEffect(
+                .regular,
+                in: RoundedRectangle(
+                    cornerRadius: Radius.xl
+                )
+            )
+            .padding(.horizontal, Spacing.md)
+        }
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text("Apa yang ingin kamu ketahui\ntentang satu sama lain?")
-                .font(AppFont.title3Bold)
-                .foregroundStyle(Color.textPrimary)
+        VStack(
+            alignment: .leading,
+            spacing: Spacing.sm
+        ) {
+            Text(
+                "Apa yang ingin kamu ketahui\ntentang satu sama lain?"
+            )
+            .font(AppFont.title3Bold)
+            .foregroundStyle(Color.textPrimary)
 
             Text(
                 "Pilihanmu akan jadi referensi topik pertanyaan untuk obrolan kalian nanti."
             )
             .font(AppFont.bodyRegular)
             .foregroundStyle(Color.textSecondary)
-            .fixedSize(horizontal: false, vertical: true)
+            .fixedSize(
+                horizontal: false,
+                vertical: true
+            )
         }
     }
 

@@ -13,36 +13,65 @@ struct TopicChip: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(AppFont.caption1Regular)
-                .foregroundStyle(isSelected ? Color.bgCard : Color.textSecondary)
+                .font(AppFont.bodyRegular)
+                .foregroundStyle(
+                    isSelected
+                    ? Color.bgCard
+                    : Color.textPrimary
+                )
                 .lineLimit(1)
                 .padding(.horizontal, Spacing.md)
-                .padding(.vertical, Spacing.sm)
-                .background(isSelected ? Color.accentPrimary : Color.bgCard)
-                .clipShape(RoundedRectangle(cornerRadius: Radius.clickable))
+                .frame(height: 35)
+                .background(
+                    isSelected
+                    ? Color.accentPrimary
+                    : Color.clear
+                )
+                .clipShape(Capsule())
                 .overlay {
-                    RoundedRectangle(cornerRadius: Radius.clickable)
-                        .stroke(isSelected ? Color.accentPrimary : Color.border, lineWidth: 1)
+                    Capsule()
+                        .stroke(
+                            Color.accentPrimary,
+                            lineWidth: 2
+                        )
                 }
         }
         .buttonStyle(.plain)
         .accessibilityLabel(title)
-        .accessibilityValue(isSelected ? "Dipilih" : "Belum dipilih")
+        .accessibilityValue(
+            isSelected
+            ? "Dipilih"
+            : "Belum dipilih"
+        )
     }
 }
 
 #Preview {
-    VStack(alignment: .leading, spacing: Spacing.sm) {
+    VStack(alignment: .leading, spacing: Spacing.md) {
         HStack(spacing: Spacing.sm) {
-            TopicChip(title: "Love Language", isSelected: false) { }
-            TopicChip(title: "Masa Depan", isSelected: true) { }
+            TopicChip(
+                title: "Love Language",
+                isSelected: false
+            ) { }
+
+            TopicChip(
+                title: "Masa Depan",
+                isSelected: true
+            ) { }
         }
 
         HStack(spacing: Spacing.sm) {
-            TopicChip(title: "Daily Life", isSelected: true) { }
-            TopicChip(title: "Perasaan", isSelected: false) { }
+            TopicChip(
+                title: "Daily Life",
+                isSelected: false
+            ) { }
+
+            TopicChip(
+                title: "Perasaan",
+                isSelected: true
+            ) { }
         }
     }
-    .padding(Spacing.md)
+    .padding(Spacing.xl)
     .background(Color.bgPrimary)
 }
