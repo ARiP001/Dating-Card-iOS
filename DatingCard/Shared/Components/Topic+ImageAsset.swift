@@ -14,11 +14,19 @@ enum TopicImageContext {
 
 extension Topics {
     static func name(for topicID: Int) -> String {
-        all.first { $0.id == topicID }?.name ?? "Topic \(topicID)"
+        if topicID == iceBreaking.id {
+            return iceBreaking.name
+        }
+
+        return all.first { $0.id == topicID }?.name ?? "Topic \(topicID)"
     }
 
     // Contoh: id 1 (About Me) -> "About Me" (questionCard) / "About Me_topic" (wouldYouRather)
     static func imageAssetName(for topicID: Int, context: TopicImageContext) -> String {
+        if topicID == iceBreaking.id {
+            return "iceBreaking"
+        }
+
         let baseName = name(for: topicID)
         switch context {
         case .questionCard:

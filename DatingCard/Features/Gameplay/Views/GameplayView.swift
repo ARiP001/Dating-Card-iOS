@@ -180,7 +180,7 @@ struct GameplayView: View {
     private var playingContent: some View {
             VStack(spacing: Spacing.lg) {
                 ZStack {
-                    Text(viewModel.topicName)
+                    Text(viewModel.currentTopicName)
                         .font(AppFont.title2Bold)
                         .foregroundStyle(Color.textPrimaryBlack)
 
@@ -200,7 +200,7 @@ struct GameplayView: View {
                         }
                         .buttonStyle(.plain)
                     }
-                }
+            }
 
             ZStack {
                 ForEach(
@@ -212,7 +212,6 @@ struct GameplayView: View {
                     ),
                     id: \.element.id
                 ) { index, card in
-
                     let depth = index - viewModel.currentIndex
 
                     let rotationAngles: [Double] = [0, 3.5, -2.5, 4.0, -3.0]
@@ -390,28 +389,30 @@ private struct GameplaySwipeCard: View {
     private let threshold: CGFloat = 120
 
     var body: some View {
-        QuestionCard(
-            question: card.question,
-            topicID: card.topicID,
-            width: 320,
-            height: 475
-        )
-        .overlay {
-            feedbackIcon
+        ZStack {
+            QuestionCard(
+                question: card.question,
+                topicID: card.topicID,
+                width: 320,
+                height: 475
+            )
+            .offset(offset)
+            .rotationEffect(
+                .degrees(offset.width / 18)
+            )
+            .gesture(
+                DragGesture()
+                    .onChanged {
+                        offset = $0.translation
+                    }
+                    .onEnded {
+                        endDrag($0.translation)
+                    }
+            )
+
+            feedbackIndicators
+                .allowsHitTesting(false)
         }
-        .offset(offset)
-        .rotationEffect(
-            .degrees(offset.width / 18)
-        )
-        .gesture(
-            DragGesture()
-                .onChanged {
-                    offset = $0.translation
-                }
-                .onEnded {
-                    endDrag($0.translation)
-                }
-        )
         .onChange(of: swipeRequest) { _, request in
             if let request {
                 swipe(request.direction)
@@ -419,35 +420,52 @@ private struct GameplaySwipeCard: View {
         }
     }
 
-    @ViewBuilder
-    private var feedbackIcon: some View {
-        
-            Image(
-                systemName:
-                    offset.width > 0
-                    ? "checkmark"
-                    : "xmark"
+    private var feedbackIndicators: some View {
+        HStack {
+            feedbackIndicator(
+                systemName: "xmark",
+                color: .buttonPrimaryRed,
+                opacity: indicatorOpacity(for: .left)
             )
+
+            Spacer()
+
+            feedbackIndicator(
+                systemName: "checkmark",
+                color: .green,
+                opacity: indicatorOpacity(for: .right)
+            )
+        }
+        .frame(width: 350)
+    }
+
+    private func feedbackIndicator(
+        systemName: String,
+        color: Color,
+        opacity: Double
+    ) -> some View {
+        Image(systemName: systemName)
             .font(.title.bold())
             .foregroundStyle(.white)
             .frame(width: 60, height: 60)
-            .background(
-                offset.width > 0
-                    ? Color.green
-                    : Color.red
-            )
+            .background(color)
             .clipShape(Circle())
-            .opacity(
-                min(
-                    abs(offset.width) / threshold,
-                    1
-                )
-            )
-            .offset(
-                x: offset.width > 0 ? 120 : -120
-                    )
+            .opacity(opacity)
+    }
 
-        
+    private func indicatorOpacity(
+        for direction: SwipeDirection
+    ) -> Double {
+        let distance: CGFloat
+
+        switch direction {
+        case .left:
+            distance = max(-offset.width, 0)
+        case .right:
+            distance = max(offset.width, 0)
+        }
+
+        return Double(min(distance / threshold, 1))
     }
 
     private func endDrag(_ translation: CGSize) {
