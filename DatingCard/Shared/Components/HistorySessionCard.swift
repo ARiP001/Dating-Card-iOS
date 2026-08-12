@@ -7,34 +7,49 @@ import SwiftUI
 
 struct HistorySessionCard: View {
     let title: String
+    let lastTopic: String
     let date: String
-    var isContinue: Bool = true
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            VStack(alignment: .leading, spacing: Spacing.xs) {
-                Text(title)
-                    .font(AppFont.bodyBold)
-                    .foregroundStyle(isContinue ? Color.bgCard : Color.textPrimary)
-                    .lineLimit(1)
+            HStack(alignment: .top, spacing: Spacing.md) {
+                VStack(alignment: .leading, spacing: Spacing.sm) {
+                    Text(title)
+                        .font(AppFont.headlineSemibold)
+                        .foregroundStyle(Color.bgCard)
+                        .lineLimit(1)
 
-                Text(date)
-                    .font(AppFont.caption2Regular)
-                    .foregroundStyle(isContinue ? Color.bgCard.opacity(0.8) : Color.textSecondary)
-                    .lineLimit(1)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, Spacing.md)
-            .padding(.vertical, Spacing.md)
-            .background(isContinue ? Color.accentPrimary : Color.bgCard)
-            .clipShape(RoundedRectangle(cornerRadius: Radius.md))
-            .overlay {
-                if !isContinue {
-                    RoundedRectangle(cornerRadius: Radius.md)
-                        .stroke(Color.border, lineWidth: 1)
+                    Text("Topik Terakhir :")
+                        .font(AppFont.caption1Regular)
+                        .foregroundStyle(Color.bgCard.opacity(0.8))
+
+                    Text(lastTopic)
+                        .font(AppFont.caption1Regular)
+                        .foregroundStyle(Color.bgCard)
+                        .lineLimit(1)
+                        .padding(.horizontal, Spacing.md)
+                        .padding(.vertical, Spacing.sm)
+                        .frame(minWidth:100 ,maxWidth: .infinity)
+                        .background(Color.neutralDarkCharcoal.opacity(0.18))
+                        .clipShape(Capsule())
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                VStack(alignment: .trailing, spacing: Spacing.sm) {
+                    Text("Belum Selesai")
+                        .font(AppFont.headlineSemibold)
+
+                    Text(date)
+                        .font(AppFont.caption1Regular)
+                }
+                .foregroundStyle(Color.bgCard)
+                .lineLimit(1)
             }
+            .frame(maxWidth: .infinity, alignment: .topLeading)
+            .padding(Spacing.lg)
+            .background(Color.accentPrimary)
+            .clipShape(RoundedRectangle(cornerRadius: Radius.lg))
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
@@ -46,14 +61,8 @@ struct HistorySessionCard: View {
     VStack(spacing: Spacing.sm) {
         HistorySessionCard(
             title: "Beach trip with her",
-            date: "21 Juli 2026 | Belum Selesai",
-            isContinue: true
-        ) { }
-
-        HistorySessionCard(
-            title: "Cafe Hangout",
-            date: "13 Juni 2026 | Selesai",
-            isContinue: false
+            lastTopic: "What Matters To Me",
+            date: "21-7-2026"
         ) { }
     }
     .padding(Spacing.md)

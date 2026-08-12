@@ -56,6 +56,7 @@
 				Features/ChoosePreferences/AppClip/Core/SupabaseConfiguration.swift,
 				Shared/Components/AppButton.swift,
 				Shared/Components/AppLoadingView.swift,
+				Shared/Components/BigTopic.swift,
 				Shared/Components/TopicChip.swift,
 				Shared/Data/Topics.swift,
 				"Shared/Extensions/Color+extension.swift",

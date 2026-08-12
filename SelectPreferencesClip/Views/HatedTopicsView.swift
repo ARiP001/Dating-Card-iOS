@@ -14,12 +14,6 @@ struct HatedTopicsView: View {
     let isSubmitting: Bool
     let onSubmit: () -> Void
 
-    private var availableTopics: [TopicModel] {
-        Topics.all.filter {
-            !selectedTopicIDs.contains($0.id)
-        }
-    }
-
     var body: some View {
         ZStack(alignment: .topTrailing) {
             Color.bgPrimary
@@ -50,16 +44,19 @@ struct HatedTopicsView: View {
 
                     header
 
-                    AppClipTopicFlowLayout(
-                        spacing: Spacing.sm
-                    ) {
-                        ForEach(availableTopics) { topic in
-                            TopicChip(
-                                title: topic.name,
-                                isSelected: hatedTopicIDs.contains(topic.id),
-                                accentColor: .brandPrimaryRosePink
-                            ) {
-                                toggle(topic.id)
+                    VStack(spacing: Spacing.md) {
+                        ForEach(Topics.groups) { group in
+                            let topics = group.topics.filter {
+                                !selectedTopicIDs.contains($0.id)
+                            }
+
+                            if !topics.isEmpty {
+                                BigTopic(
+                                    title: group.name,
+                                    topics: topics,
+                                    selectedTopicIDs: $hatedTopicIDs,
+                                    accentColor: .brandPrimaryRosePink
+                                )
                             }
                         }
                     }
@@ -141,14 +138,6 @@ struct HatedTopicsView: View {
                 horizontal: false,
                 vertical: true
             )
-        }
-    }
-
-    private func toggle(_ topicID: Int) {
-        if hatedTopicIDs.contains(topicID) {
-            hatedTopicIDs.remove(topicID)
-        } else {
-            hatedTopicIDs.insert(topicID)
         }
     }
 

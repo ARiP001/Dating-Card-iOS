@@ -5,6 +5,7 @@
 //  Created by Arif Fathurrahman on 11/08/26.
 //
 
+import SwiftData
 import SwiftUI
 
 struct HomeView: View {
@@ -13,70 +14,138 @@ struct HomeView: View {
         case individual
     }
 
+    @Query(
+        filter: #Predicate<SessionModel> { session in
+            session.isContinue == true
+        },
+        sort: \SessionModel.createdAt,
+        order: .reverse
+    ) private var unfinishedSessions: [SessionModel]
+
     @State private var isShowingTopicSelection = false
+    @State private var isShowingPreviousSessionAlert = false
     @State private var pendingRoute: PendingRoute?
     @State private var isShowingAlternatingFlow = false
     @State private var isShowingIndividualFlow = false
+    @State private var sessionToResume: SessionModel?
+    @State private var isResumingSession = false
     @State private var isPulsing = false
 
     var body: some View {
-        NavigationStack {
-            GeometryReader { geometry in
-                ZStack(alignment: .topLeading) {
-                    VStack(alignment: .leading, spacing: Spacing.md) {
-                        Text("Kenal Lebih\ndari Sekadar\nNama")
-                            .font(AppFont.largeTitleBold)
+        ZStack {
+            NavigationStack {
+                GeometryReader { geometry in
+                    ZStack(alignment: .topLeading) {
+                        VStack(alignment: .leading, spacing: Spacing.md) {
+                            Text("Kenal,\nLebih dari\nSekadar Nama")
+                                .font(AppFont.largeTitleBold)
+                                .foregroundStyle(Color.textPrimary)
+
+                            Text(
+                                "Mainkan kartu bersama,\nsaling bercerita, dan\nmengenal lebih dekat"
+                            )
+                            .font(AppFont.title3Regular)
                             .foregroundStyle(Color.textPrimary)
+                        }
+                        .padding(.horizontal, Spacing.xl)
+                        .padding(.top, Spacing.xl)
 
-                        Text(
-                            "Mainkan kartu bersama,\nsaling bercerita, dan\nmengenal lebih dekat"
+                        startControl(
+                            maximumDiameter: min(
+                                geometry.size.width * 1.1,
+                                430
+                            )
                         )
-                        .font(AppFont.title3Regular)
-                        .foregroundStyle(Color.textPrimary)
+                        .position(
+                            x: geometry.size.width / 2,
+                            y: geometry.size.height * 0.60
+                        )
                     }
-                    .padding(.horizontal, Spacing.xl)
-                    .padding(.top, Spacing.xl)
-
-                    startControl(
-                        maximumDiameter: min(
-                            geometry.size.width * 1.1,
-                            430
-                        )
+                }
+                .ignoresSafeArea(.container, edges: .bottom)
+                .background(homeBackground.ignoresSafeArea())
+                .navigationDestination(isPresented: $isShowingAlternatingFlow) {
+                    TurnBasedPreferencesView()
+                        .toolbar(.hidden, for: .tabBar)
+                }
+                .navigationDestination(isPresented: $isShowingIndividualFlow) {
+                    QRView()
+                        .toolbar(.hidden, for: .tabBar)
+                }
+                .navigationDestination(isPresented: $isResumingSession) {
+                    if let sessionToResume {
+                        WouldYouRatherView(session: sessionToResume)
+                            .toolbar(.hidden, for: .tabBar)
+                    }
+                }
+                .sheet(
+                    isPresented: $isShowingTopicSelection,
+                    onDismiss: presentPendingRoute
+                ) {
+                    TopicSelectionSheet(
+                        onAlternatingSelected: {
+                            pendingRoute = .alternating
+                        },
+                        onIndividualSelected: {
+                            pendingRoute = .individual
+                        }
                     )
-                    .position(
-                        x: geometry.size.width / 2,
-                        y: geometry.size.height * 0.60
-                    )
+                    .presentationDetents([.fraction(0.6)])
+                    .presentationDragIndicator(.visible)
+                    .presentationCornerRadius(Radius.xl)
                 }
             }
-            .ignoresSafeArea(.container, edges: .bottom)
-            .background(homeBackground.ignoresSafeArea())
-            .navigationDestination(isPresented: $isShowingAlternatingFlow) {
-                TurnBasedPreferencesView()
-                    .toolbar(.hidden, for: .tabBar)
-            }
-            .navigationDestination(isPresented: $isShowingIndividualFlow) {
-                QRView()
-                    .toolbar(.hidden, for: .tabBar)
-            }
-            .sheet(
-                isPresented: $isShowingTopicSelection,
-                onDismiss: presentPendingRoute
-            ) {
-                TopicSelectionSheet(
-                    onAlternatingSelected: {
-                        pendingRoute = .alternating
-                    },
-                    onIndividualSelected: {
-                        pendingRoute = .individual
-                    }
+            .allowsHitTesting(!isShowingPreviousSessionAlert)
+
+            if isShowingPreviousSessionAlert {
+                Color.textPrimary
+                    .opacity(0.45)
+                    .ignoresSafeArea()
+
+                AppConfirmationAlert(
+                    title: "Permainan Terakhir",
+                    message: "Apakah kamu ingin melanjutkan permainan sebelumnya?\n\nJika tidak, kamu dapat melanjutkannya melalui riwayat permainan.",
+                    accentColor: .accentDustyMauve,
+                    confirmTitle: "Lanjutkan bermain",
+                    cancelTitle: "Tidak",
+                    onConfirm: resumeLatestSession,
+                    onCancel: startNewSession
                 )
-                .presentationDetents([.fraction(0.6)])
-                .presentationDragIndicator(.visible)
-                .presentationCornerRadius(Radius.xl)
-//                .presentationBackground(Color.bgPrimary)
+                .padding(.horizontal, Spacing.xl)
+                .transition(
+                    .scale(scale: 0.96)
+                    .combined(with: .opacity)
+                )
             }
         }
+        .animation(
+            .easeInOut(duration: 0.2),
+            value: isShowingPreviousSessionAlert
+        )
+    }
+
+    private func handleStartButton() {
+        if unfinishedSessions.isEmpty {
+            isShowingTopicSelection = true
+        } else {
+            isShowingPreviousSessionAlert = true
+        }
+    }
+
+    private func resumeLatestSession() {
+        guard let latestSession = unfinishedSessions.first else {
+            startNewSession()
+            return
+        }
+
+        sessionToResume = latestSession
+        isShowingPreviousSessionAlert = false
+        isResumingSession = true
+    }
+
+    private func startNewSession() {
+        isShowingPreviousSessionAlert = false
+        isShowingTopicSelection = true
     }
 
     private func presentPendingRoute() {
@@ -136,7 +205,7 @@ struct HomeView: View {
             }
 
             Button {
-                isShowingTopicSelection = true
+                handleStartButton()
             } label: {
                 Text("Mulai\nBermain")
                     .font(AppFont.title1Bold)
@@ -277,7 +346,7 @@ private struct TopicSelectionSheet: View {
                 }
             }
             .padding(.horizontal, Spacing.xl)
-            .navigationTitle("Pemilihan Topik")
+            .navigationTitle("Pemilihan Topik Obrolan")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -285,7 +354,13 @@ private struct TopicSelectionSheet: View {
                         dismiss()
                     } label: {
                         Image(systemName: "xmark")
+//                            .font(.system(size: 14, weight: .semibold))
+//                            .foregroundStyle(Color.textPrimaryBlack)
+//                            .frame(width: 32, height: 32)
+//                            .background(Color.textSecondaryDarkGrey)
+//                            .clipShape(Circle())
                     }
+                    .buttonStyle(.plain)
                     .accessibilityLabel("Tutup")
                 }
             }

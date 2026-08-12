@@ -14,7 +14,7 @@ struct MainTabView: View {
 
             HistoryView()
                 .tabItem {
-                    Label("History", systemImage: "clock.arrow.circlepath")
+                    Label("Session", systemImage: "clock.arrow.circlepath")
                 }
                 .tag(MainTab.history)
         }

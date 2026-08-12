@@ -38,17 +38,14 @@ struct SelectedTopicsView: View {
                 ) {
                     header
 
-                    AppClipTopicFlowLayout(
-                        spacing: Spacing.sm
-                    ) {
-                        ForEach(Topics.all) { topic in
-                            TopicChip(
-                                title: topic.name,
-                                isSelected: selectedTopicIDs.contains(topic.id),
+                    VStack(spacing: Spacing.md) {
+                        ForEach(Topics.groups) { group in
+                            BigTopic(
+                                title: group.name,
+                                topics: group.topics,
+                                selectedTopicIDs: $selectedTopicIDs,
                                 accentColor: .brandPrimaryRosePink
-                            ) {
-                                toggle(topic.id)
-                            }
+                            )
                         }
                     }
                 }
@@ -104,119 +101,6 @@ struct SelectedTopicsView: View {
         }
     }
 
-    private func toggle(_ topicID: Int) {
-        if selectedTopicIDs.contains(topicID) {
-            selectedTopicIDs.remove(topicID)
-        } else {
-            selectedTopicIDs.insert(topicID)
-        }
-    }
-}
-
-/// Layout chip yang dipakai bersama oleh dua halaman pemilihan topik App Clip.
-struct AppClipTopicFlowLayout: Layout {
-    let spacing: CGFloat
-
-    func sizeThatFits(
-        proposal: ProposedViewSize,
-        subviews: Subviews,
-        cache: inout ()
-    ) -> CGSize {
-        let maximumWidth =
-            proposal.width ?? .infinity
-
-        var rowWidth: CGFloat = 0
-        var rowHeight: CGFloat = 0
-        var totalHeight: CGFloat = 0
-        var contentWidth: CGFloat = 0
-
-        for subview in subviews {
-            let size =
-                subview.sizeThatFits(.unspecified)
-
-            let nextWidth =
-                rowWidth == 0
-                ? size.width
-                : rowWidth + spacing + size.width
-
-            if nextWidth > maximumWidth,
-               rowWidth > 0 {
-                contentWidth = max(
-                    contentWidth,
-                    rowWidth
-                )
-
-                totalHeight +=
-                    rowHeight + spacing
-
-                rowWidth = size.width
-                rowHeight = size.height
-            } else {
-                rowWidth = nextWidth
-
-                rowHeight = max(
-                    rowHeight,
-                    size.height
-                )
-            }
-        }
-
-        contentWidth = max(
-            contentWidth,
-            rowWidth
-        )
-
-        totalHeight += rowHeight
-
-        return CGSize(
-            width:
-                proposal.width ?? contentWidth,
-            height:
-                totalHeight
-        )
-    }
-
-    func placeSubviews(
-        in bounds: CGRect,
-        proposal: ProposedViewSize,
-        subviews: Subviews,
-        cache: inout ()
-    ) {
-        var x = bounds.minX
-        var y = bounds.minY
-        var rowHeight: CGFloat = 0
-
-        for subview in subviews {
-            let size =
-                subview.sizeThatFits(.unspecified)
-
-            if x > bounds.minX,
-               x + size.width > bounds.maxX {
-                x = bounds.minX
-                y += rowHeight + spacing
-                rowHeight = 0
-            }
-
-            subview.place(
-                at: CGPoint(
-                    x: x,
-                    y: y
-                ),
-                anchor: .topLeading,
-                proposal: ProposedViewSize(
-                    width: size.width,
-                    height: size.height
-                )
-            )
-
-            x += size.width + spacing
-
-            rowHeight = max(
-                rowHeight,
-                size.height
-            )
-        }
-    }
 }
 
 #Preview {

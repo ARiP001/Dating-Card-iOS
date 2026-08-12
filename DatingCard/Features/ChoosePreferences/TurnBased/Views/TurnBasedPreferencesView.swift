@@ -63,15 +63,16 @@ struct TurnBasedPreferencesView: View {
                     .opacity(0.45)
                     .ignoresSafeArea()
 
-                TurnAlert(
+                AppConfirmationAlert(
                     title: alertTurn.alertTitle,
                     message: alertTurn.alertMessage,
-                    accentColor: alertTurn.accentColor
-                ) {
-                    withAnimation(.easeOut(duration: 0.2)) {
-                        self.alertTurn = nil
+                    accentColor: alertTurn.accentColor,
+                    onConfirm: {
+                        withAnimation(.easeOut(duration: 0.2)) {
+                            self.alertTurn = nil
+                        }
                     }
-                }
+                )
                 .padding(.horizontal, Spacing.xl)
                 .transition(.scale(scale: 0.96).combined(with: .opacity))
             }
@@ -85,6 +86,7 @@ struct TurnBasedPreferencesView: View {
                 hatedTopicIDs: currentHatedTopicIDs,
                 onSubmit: finishCurrentTurn
             )
+            .id(turn)
         }
     }
 
@@ -97,6 +99,7 @@ struct TurnBasedPreferencesView: View {
                 accentColor: turn.accentColor,
                 onContinue: showHatedTopics
             )
+            .id(turn)
             .navigationBarBackButtonHidden(turn == .partner)
 
         case .wouldYouRather:
@@ -166,38 +169,6 @@ struct TurnBasedPreferencesView: View {
         return Topics.all.compactMap { topic in
             availableIDs.contains(topic.id) ? topic.id : nil
         }
-    }
-}
-
-private struct TurnAlert: View {
-    let title: String
-    let message: String
-    let accentColor: Color
-    let onConfirm: () -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.md) {
-            VStack(alignment: .leading, spacing: Spacing.sm) {
-                Text(title)
-                    .font(AppFont.bodyBold)
-                    .foregroundStyle(Color.textPrimary)
-
-                Text(message)
-                    .font(AppFont.bodyRegular)
-                    .foregroundStyle(Color.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-
-            AppButton(
-                title: "Oke",
-                accentColor: accentColor,
-                action: onConfirm
-            )
-        }
-        .padding(Spacing.lg)
-        .frame(maxWidth: 330)
-        .background(Color.bgCard)
-        .clipShape(RoundedRectangle(cornerRadius: Radius.xl))
     }
 }
 

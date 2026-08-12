@@ -6,6 +6,18 @@
 //
 
 enum Topics {
+    struct Group: Identifiable {
+        let id: String
+        let name: String
+        let topicIDs: ClosedRange<Int>
+
+        var topics: [TopicModel] {
+            Topics.all.filter {
+                topicIDs.contains($0.id)
+            }
+        }
+    }
+
     static let all: [TopicModel] = [
         // MARK: Identity
         TopicModel(id: 1, name: "About Me"),
@@ -43,5 +55,14 @@ enum Topics {
         // MARK: Future
         TopicModel(id: 24, name: "Future Me"),
         TopicModel(id: 25, name: "Dream Life")
+    ]
+
+    static let groups: [Group] = [
+        Group(id: "identity", name: "Identity", topicIDs: 1...5),
+        Group(id: "lifestyle", name: "Lifestyle", topicIDs: 6...9),
+        Group(id: "values", name: "Values", topicIDs: 10...13),
+        Group(id: "relationship", name: "Relationship", topicIDs: 14...18),
+        Group(id: "emotional", name: "Emotional", topicIDs: 19...23),
+        Group(id: "future", name: "Future", topicIDs: 24...25)
     ]
 }

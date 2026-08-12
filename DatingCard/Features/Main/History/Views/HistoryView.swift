@@ -3,7 +3,13 @@ import SwiftUI
 
 struct HistoryView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \SessionModel.createdAt, order: .reverse) private var sessions: [SessionModel]
+    @Query(
+        filter: #Predicate<SessionModel> { session in
+            session.isContinue == true
+        },
+        sort: \SessionModel.createdAt,
+        order: .reverse
+    ) private var sessions: [SessionModel]
     @State private var selectedSession: SessionModel?
     @State private var pendingSessionToResume: SessionModel?
     @State private var sessionToResume: SessionModel?
@@ -31,8 +37,8 @@ struct HistoryView: View {
                     ForEach(sessions, id: \.id) { session in
                         HistorySessionCard(
                             title: session.title,
-                            date: "\(session.createdAt.formatted(.dateTime.day().month(.wide).year().locale(Locale(identifier: "id_ID")))) | \(session.isContinue ? "Belum Selesai" : "Selesai")",
-                            isContinue: session.isContinue
+                            lastTopic: topicName(for: session.lastTopicID),
+                            date: formattedDate(session.createdAt)
                         ) {
                             selectedSession = session
                         }
@@ -84,6 +90,24 @@ struct HistoryView: View {
         self.pendingSessionToResume = nil
         sessionToResume = pendingSessionToResume
         isResumingSession = true
+    }
+
+    private func topicName(for topicID: Int?) -> String {
+        guard let topicID else {
+            return "Belum ada topik"
+        }
+
+        return Topics.all.first { $0.id == topicID }?.name
+            ?? "Belum ada topik"
+    }
+
+    private func formattedDate(_ date: Date) -> String {
+        let components = Calendar.current.dateComponents(
+            [.day, .month, .year],
+            from: date
+        )
+
+        return "\(components.day ?? 0)-\(components.month ?? 0)-\(components.year ?? 0)"
     }
 
     private func updateTitle(
