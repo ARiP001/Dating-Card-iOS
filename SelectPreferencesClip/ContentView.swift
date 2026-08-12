@@ -86,6 +86,7 @@ struct AppClipContentView: View {
                 }
             }
         }
+        .tint(Color.brandPrimaryRosePink)
 
         // Akan dijalankan lagi ketika
         // sessionID berubah dari nil → actual ID.

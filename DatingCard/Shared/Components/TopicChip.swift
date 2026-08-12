@@ -8,6 +8,7 @@ import SwiftUI
 struct TopicChip: View {
     let title: String
     let isSelected: Bool
+    var accentColor: Color = .accentPrimary
     let action: () -> Void
 
     var body: some View {
@@ -24,14 +25,14 @@ struct TopicChip: View {
                 .frame(height: 35)
                 .background(
                     isSelected
-                    ? Color.accentPrimary
+                    ? accentColor
                     : Color.clear
                 )
                 .clipShape(Capsule())
                 .overlay {
                     Capsule()
                         .stroke(
-                            Color.accentPrimary,
+                            accentColor,
                             lineWidth: 2
                         )
                 }

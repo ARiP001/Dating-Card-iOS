@@ -19,6 +19,7 @@ struct QRView: View {
 
     @State private var flowStep: FlowStep = .preferences
     @State private var isShowingHatedTopics = false
+    @State private var isShowingBackConfirmation = false
 
     @State private var hasPrintedCombinedPreferences = false
 
@@ -50,9 +51,35 @@ struct QRView: View {
                 .ignoresSafeArea()
         )
 
-        // Saat masih QR page,
-        // gunakan X custom dan hide native back.
-        .navigationBarBackButtonHidden(!partnerHasJoined)
+        // Leaving the root QR flow requires confirmation. Child pages such
+        // as hated-topic selection keep their own native back navigation.
+        .navigationBarBackButtonHidden(true)
+
+        .toolbar {
+            if partnerHasJoined && !isShowingHatedTopics {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        isShowingBackConfirmation = true
+                    } label: {
+                        Image(systemName: "chevron.left")
+                    }
+                    .accessibilityLabel("Kembali")
+                }
+            }
+        }
+
+        .alert(
+            "Kembali ke Home?",
+            isPresented: $isShowingBackConfirmation
+        ) {
+            Button("Batal", role: .cancel) { }
+
+            Button("Kembali", role: .destructive) {
+                dismiss()
+            }
+        } message: {
+            Text("Apakah yakin mau kembali ke Home?")
+        }
 
         .task {
             if viewModel.sessionID == nil {
@@ -120,7 +147,7 @@ struct QRView: View {
         case .waitingForPartner:
             SessionWaitingView(
                 message:
-                    "Menunggu perangkat lain\nmenyelesaikan pilihannya"
+                    "Menunggu\nperangkat lain\nmenyelesaikan\npilihannya..."
             )
         }
     }
@@ -164,7 +191,7 @@ struct QRView: View {
 
     private var closeButton: some View {
         Button {
-            dismiss()
+            isShowingBackConfirmation = true
         } label: {
             Image(systemName: "xmark")
                 .font(

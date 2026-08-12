@@ -27,7 +27,7 @@ struct HatedTopicsView: View {
 
             Circle()
                 .fill(
-                    Color.accentDustyMauve.opacity(0.25)
+                    Color.brandPrimaryRosePink.opacity(0.25)
                 )
                 .frame(
                     width: 360,
@@ -56,7 +56,8 @@ struct HatedTopicsView: View {
                         ForEach(availableTopics) { topic in
                             TopicChip(
                                 title: topic.name,
-                                isSelected: hatedTopicIDs.contains(topic.id)
+                                isSelected: hatedTopicIDs.contains(topic.id),
+                                accentColor: .brandPrimaryRosePink
                             ) {
                                 toggle(topic.id)
                             }
@@ -76,6 +77,7 @@ struct HatedTopicsView: View {
                         ? "Mengirim..."
                         : "Mulai",
                     isEnabled: !isSubmitting,
+                    accentColor: .brandPrimaryRosePink,
                     action: onSubmit
                 )
                 .padding(.horizontal, Spacing.md)
@@ -111,7 +113,7 @@ struct HatedTopicsView: View {
                     height: 44
                 )
                 .background(
-                    Color.accentPrimary
+                    Color.brandPrimaryRosePink
                 )
                 .clipShape(Circle())
         }

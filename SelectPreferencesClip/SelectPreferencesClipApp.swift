@@ -24,6 +24,7 @@ struct AppClipPOCClipApp: App {
                 .onOpenURL { url in
                     invocationRouter.handle(url)
                 }
+                .preferredColorScheme(.light)
         }
     }
 }

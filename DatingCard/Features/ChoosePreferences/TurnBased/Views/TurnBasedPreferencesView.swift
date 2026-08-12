@@ -27,6 +27,15 @@ struct TurnBasedPreferencesView: View {
                 return "Giliran lawan bicara kamu memilih topik yang ingin kalian bahas"
             }
         }
+
+        var accentColor: Color {
+            switch self {
+            case .user:
+                return .accentDustyMauve
+            case .partner:
+                return .brandPrimaryRosePink
+            }
+        }
     }
 
     private enum Step: Equatable {
@@ -56,7 +65,8 @@ struct TurnBasedPreferencesView: View {
 
                 TurnAlert(
                     title: alertTurn.alertTitle,
-                    message: alertTurn.alertMessage
+                    message: alertTurn.alertMessage,
+                    accentColor: alertTurn.accentColor
                 ) {
                     withAnimation(.easeOut(duration: 0.2)) {
                         self.alertTurn = nil
@@ -71,6 +81,7 @@ struct TurnBasedPreferencesView: View {
         .navigationDestination(isPresented: $isShowingHatedTopics) {
             TurnBasedHatedChooseView(
                 selectedTopicIDs: currentSelectedTopicIDs.wrappedValue,
+                accentColor: turn.accentColor,
                 hatedTopicIDs: currentHatedTopicIDs,
                 onSubmit: finishCurrentTurn
             )
@@ -83,6 +94,7 @@ struct TurnBasedPreferencesView: View {
         case .preferences:
             TurnBasedPreferencesChooseView(
                 selectedTopicIDs: currentSelectedTopicIDs,
+                accentColor: turn.accentColor,
                 onContinue: showHatedTopics
             )
             .navigationBarBackButtonHidden(turn == .partner)
@@ -160,6 +172,7 @@ struct TurnBasedPreferencesView: View {
 private struct TurnAlert: View {
     let title: String
     let message: String
+    let accentColor: Color
     let onConfirm: () -> Void
 
     var body: some View {
@@ -175,7 +188,11 @@ private struct TurnAlert: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            AppButton(title: "Oke", action: onConfirm)
+            AppButton(
+                title: "Oke",
+                accentColor: accentColor,
+                action: onConfirm
+            )
         }
         .padding(Spacing.lg)
         .frame(maxWidth: 330)
@@ -187,4 +204,3 @@ private struct TurnAlert: View {
 #Preview {
     TurnBasedPreferencesView()
 }
-

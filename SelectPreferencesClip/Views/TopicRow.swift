@@ -86,7 +86,7 @@ struct TopicRow: View {
         switch style {
 
         case .normal:
-            return .accentColor
+            return .brandPrimaryRosePink
 
         case .negative:
             return .red
@@ -107,7 +107,7 @@ struct TopicRow: View {
 
         case .normal:
             return Color
-                .accentColor
+                .brandPrimaryRosePink
                 .opacity(0.12)
 
         case .negative:

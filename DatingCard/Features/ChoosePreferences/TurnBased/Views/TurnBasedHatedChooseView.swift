@@ -11,6 +11,7 @@ import SwiftUI
 
 struct TurnBasedHatedChooseView: View {
     let selectedTopicIDs: Set<Int>
+    let accentColor: Color
 
     @Binding var hatedTopicIDs: Set<Int>
 
@@ -29,7 +30,7 @@ struct TurnBasedHatedChooseView: View {
 
             Circle()
                 .fill(
-                    Color.accentDustyMauve.opacity(0.25)
+                    accentColor.opacity(0.25)
                 )
                 .frame(
                     width: 360,
@@ -56,7 +57,8 @@ struct TurnBasedHatedChooseView: View {
                         ForEach(availableTopics) { topic in
                             TopicChip(
                                 title: topic.name,
-                                isSelected: hatedTopicIDs.contains(topic.id)
+                                isSelected: hatedTopicIDs.contains(topic.id),
+                                accentColor: accentColor
                             ) {
                                 toggle(topic.id)
                             }
@@ -73,6 +75,7 @@ struct TurnBasedHatedChooseView: View {
             VStack {
                 AppButton(
                     title: "Mulai",
+                    accentColor: accentColor,
                     action: onSubmit
                 )
                 .padding(.horizontal, Spacing.md)
@@ -134,6 +137,7 @@ struct TurnBasedHatedChooseView: View {
 #Preview {
     TurnBasedHatedChooseView(
         selectedTopicIDs: [1, 2, 6],
+        accentColor: .accentDustyMauve,
         hatedTopicIDs: .constant([7, 14]),
         onSubmit: { }
     )

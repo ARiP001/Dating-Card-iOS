@@ -9,8 +9,7 @@ import SwiftUI
 
 struct HistoryView: View {
     @State private var selectedSession: HistorySession?
-
-    private let sessions = HistorySession.samples
+    @State private var sessions = HistorySession.samples
 
     var body: some View {
         ScrollView {
@@ -35,26 +34,62 @@ struct HistoryView: View {
         }
         .background(Color.bgPrimary.ignoresSafeArea())
         .sheet(item: $selectedSession) { session in
-            HistorySessionDetailView(session: session)
+            NavigationStack {
+                HistorySessionDetailView(
+                    session: session,
+                    onTitleChanged: { newTitle in
+                        updateTitle(
+                            newTitle,
+                            for: session.id
+                        )
+                    }
+                )
+            }
             .presentationDetents([.large])
             .presentationDragIndicator(.visible)
             .presentationCornerRadius(Radius.xl)
             .presentationBackground(Color.bgCard)
         }
     }
+
+    private func updateTitle(
+        _ title: String,
+        for sessionID: UUID
+    ) {
+        guard let index = sessions.firstIndex(
+            where: { $0.id == sessionID }
+        ) else {
+            return
+        }
+
+        sessions[index].title = title
+        selectedSession = sessions[index]
+    }
 }
 
 private struct HistorySessionDetailView: View {
     let session: HistorySession
+    let onTitleChanged: (String) -> Void
+
     @Environment(\.dismiss) private var dismiss
+    @State private var title: String
+    @State private var draftTitle: String
+    @State private var isShowingTitleEditor = false
+
+    init(
+        session: HistorySession,
+        onTitleChanged: @escaping (String) -> Void
+    ) {
+        self.session = session
+        self.onTitleChanged = onTitleChanged
+        _title = State(initialValue: session.title)
+        _draftTitle = State(initialValue: session.title)
+    }
 
     var body: some View {
         VStack(spacing: 0) {
-            header
-                .padding(.top, Spacing.md)
-                .padding(.bottom, Spacing.lg)
-
             questionDeck
+                .padding(.top, Spacing.lg)
 
             details
                 .padding(.top, Spacing.lg)
@@ -67,25 +102,35 @@ private struct HistorySessionDetailView: View {
         .padding(.horizontal, Spacing.xl)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color.bgCard)
-    }
-
-    private var header: some View {
-        ZStack {
-            Text(session.title)
-                .font(AppFont.bodyBold)
-                .foregroundStyle(Color.textPrimary)
-                .frame(maxWidth: .infinity, alignment: .center)
-                .lineLimit(1)
-
-            HStack {
-                iconButton(systemName: "pencil")
-
-                Spacer()
-
-                iconButton(systemName: "xmark") {
-                    dismiss()
+        .navigationTitle(title)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button("Edit", systemImage: "pencil") {
+                    draftTitle = title
+                    isShowingTitleEditor = true
                 }
             }
+
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Selesai", systemImage: "xmark") {
+                    dismiss()
+                }.tint(.white)
+            }
+        }
+        .alert(
+            "Edit Judul",
+            isPresented: $isShowingTitleEditor
+        ) {
+            TextField("Judul sesi", text: $draftTitle)
+
+            Button("Batal", role: .cancel) { }
+
+            Button("Simpan") {
+                saveTitle()
+            }
+        } message: {
+            Text("Masukkan judul baru untuk sesi ini.")
         }
     }
 
@@ -133,26 +178,23 @@ private struct HistorySessionDetailView: View {
         }
     }
 
-    private func iconButton(
-        systemName: String,
-        action: @escaping () -> Void = { }
-    ) -> some View {
-        Button(action: action) {
-            Image(systemName: systemName)
-                .font(.title3.weight(.medium))
-                .foregroundStyle(Color.textPrimary)
-                .frame(width: 48, height: 48)
-                .background(Color.surfaceSecondary)
-                .clipShape(Circle())
+    private func saveTitle() {
+        let newTitle = draftTitle.trimmingCharacters(
+            in: .whitespacesAndNewlines
+        )
+
+        guard !newTitle.isEmpty else {
+            return
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel(systemName == "xmark" ? "Tutup" : "Edit")
+
+        title = newTitle
+        onTitleChanged(newTitle)
     }
 }
 
 private struct HistorySession: Identifiable, Equatable {
     let id = UUID()
-    let title: String
+    var title: String
     let date: String
     let cards: [HistoryQuestion]
     let openCardsCount: Int
