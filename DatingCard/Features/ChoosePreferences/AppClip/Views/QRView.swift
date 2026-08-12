@@ -217,7 +217,7 @@ struct QRView: View {
                     height: 44
                 )
                 .background(
-                    Color.bgCard.opacity(0.85)
+                    .ultraThinMaterial
                 )
                 .clipShape(Circle())
         }

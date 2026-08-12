@@ -279,7 +279,6 @@ private struct WouldYouRatherSelectionView: View {
     }
 
     // MARK: - Option Card
-
     private func optionCard(
         at index: Int
     ) -> some View {

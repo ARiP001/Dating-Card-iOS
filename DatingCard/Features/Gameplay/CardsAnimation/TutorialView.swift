@@ -138,7 +138,7 @@ struct TutorialView: View {
             if step == .swipeRight {
                 actionIndicator(
                     systemName: "checkmark",
-                    color: .accentPrimary
+                    color: .green
                 )
                 .offset(x: 22)
                 .transition(
@@ -205,7 +205,7 @@ struct TutorialView: View {
             Text(
                 step == .swipeRight
                     ? "Kartu ini dapat dilihat di riwayat dan tidak akan muncul lagi"
-                    : "Kartu ini tidak akan disimpan dan tidak akan muncul lagi"
+                    : "Kartu ini tidak akan tersimpan di riwayat dan bisa dimainkan lagi"
             )
             .font(AppFont.bodyRegular)
             .foregroundStyle(Color.bgCard.opacity(0.82))

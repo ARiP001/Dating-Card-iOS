@@ -55,7 +55,7 @@ struct AppConfirmationAlert: View {
                 Button(action: onCancel) {
                     Text(cancelTitle)
                         .font(AppFont.headlineSemibold)
-                        .foregroundStyle(Color.red)
+                        .foregroundStyle(Color.accentPrimary)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, Spacing.md)
                         .background(Color.bgPrimary)

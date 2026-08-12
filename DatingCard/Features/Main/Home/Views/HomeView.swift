@@ -98,10 +98,10 @@ struct HomeView: View {
 
                 AppConfirmationAlert(
                     title: "Permainan Terakhir",
-                    message: "Apakah kamu ingin melanjutkan permainan sebelumnya?\n\nJika tidak, kamu dapat melanjutkannya melalui riwayat permainan.",
+                    message: "Apakah kamu ingin melanjutkan permainan sebelumnya?",
                     accentColor: .accentDustyMauve,
-                    confirmTitle: "Lanjutkan bermain",
-                    cancelTitle: "Tidak",
+                    confirmTitle: "Lanjutkan Bermain",
+                    cancelTitle: "Tidak, Mulai Sesi Baru",
                     onConfirm: showHistory,
                     onCancel: startNewSession
                 )

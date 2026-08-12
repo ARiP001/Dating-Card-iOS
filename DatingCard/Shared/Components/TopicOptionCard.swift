@@ -61,13 +61,6 @@ struct TopicOptionCard<Value: Hashable>: View {
                     cornerRadius: Radius.sm
                 )
             )
-            .overlay {
-                RoundedRectangle(cornerRadius: Radius.sm)
-                    .stroke(
-                        borderColor,
-                        lineWidth: isSelected ? 4 : 2
-                    )
-            }
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
