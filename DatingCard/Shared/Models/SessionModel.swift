@@ -11,6 +11,8 @@ import SwiftData
 final class SessionModel {
     var id: UUID
     var isContinue: Bool
+    var title: String
+    var createdAt: Date
 
     // Final topic pool for this session: the union of both users'
     // preferences after every hated topic has been removed.
@@ -27,7 +29,9 @@ final class SessionModel {
 
     init(
         id: UUID = UUID(),
-        isContinue: Bool = false,
+        isContinue: Bool = true,
+        title: String = "Sesi percakapan",
+        createdAt: Date = .now,
         selectedTopicIDs: [Int] = [],
         currentTopicIDs: [Int] = [],
         pickedCards: [CardModel] = [],
@@ -36,6 +40,8 @@ final class SessionModel {
     ) {
         self.id = id
         self.isContinue = isContinue
+        self.title = title
+        self.createdAt = createdAt
         self.selectedTopicIDs = selectedTopicIDs
         self.currentTopicIDs = currentTopicIDs
         self.pickedCards = pickedCards

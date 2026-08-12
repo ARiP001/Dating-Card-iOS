@@ -20,6 +20,10 @@ struct WouldYouRatherView: View {
         )
     }
 
+    init(session: SessionModel) {
+        _viewModel = StateObject(wrappedValue: WouldYouRatherViewModel(session: session))
+    }
+
     var body: some View {
         ZStack {
             switch viewModel.screenState {
@@ -33,7 +37,7 @@ struct WouldYouRatherView: View {
                             dampingFraction: 0.8
                         )
                     ) {
-                        viewModel.proceedFromShuffling()
+                        viewModel.proceedFromShuffling(in: modelContext)
                     }
                 }
                 .transition(.opacity)
@@ -64,15 +68,35 @@ struct WouldYouRatherView: View {
                     cards: viewModel.pickedPackCards,
                     selectedCardID: $viewModel.selectedCardID,
                     onConfirm: {
-                        persistSelectedCard()
+                        viewModel.startSelectedTopic(in: modelContext)
+                    },
+                    onDismiss: {
+                        dismiss()
                     }
                 )
                 .transition(.opacity)
                 .zIndex(2)
 
+            case let .gameplay(topicID):
+                if let session = viewModel.session {
+                    GameplayView(
+                        session: session,
+                        topicID: topicID,
+                        onOpenAnotherPack: {
+                            viewModel.prepareNextPack(in: modelContext)
+                        }
+                    )
+                    .transition(.opacity)
+                    .zIndex(3)
+                }
+
+            case let .topicExhausted(topicName):
+                topicExhaustedContent(topicName: topicName)
+                    .zIndex(4)
+
             case .empty:
                 emptyContent
-                    .zIndex(3)
+                    .zIndex(5)
             }
         }
         .toolbar(.hidden, for: .navigationBar)
@@ -85,34 +109,34 @@ struct WouldYouRatherView: View {
                 in: modelContext
             )
         }
+        .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
     }
 
     private var emptyContent: some View {
-        VStack(spacing: 16) {
-            Text(
-                "Belum ada kartu untuk topik ini"
-            )
-            .font(.title3.bold())
-
-            Text(
-                "Coba pilih topik lain dari flow preference."
-            )
-            .font(.body)
-            .foregroundStyle(.secondary)
-            .multilineTextAlignment(.center)
+        AppEmptyState(
+            title: "Belum ada topik yang cocok",
+            message: "Topik yang kalian pilih belum memiliki preferensi yang sama. Cobalah mulai sesi baru dan pilih topik yang bisa kalian sepakati bersama.",
+            actionTitle: "Kembali ke Home"
+        ) {
+            dismiss()
         }
-        .padding(24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.bgPrimary.ignoresSafeArea())
     }
 
-    private func persistSelectedCard() {
-        do {
-            try modelContext.save()
-        } catch {
-            print(
-                "Failed to save selected would you rather card: \(error)"
-            )
+    private func topicExhaustedContent(topicName: String) -> some View {
+        AppEmptyState(
+            title: "Kartu untuk topik ini sudah habis",
+            message: "Selamat, kamu sudah memahami \(topicName) dengan baik sejauh ini. Yuk pilih topik lain untuk terus mengenal satu sama lain.",
+            actionTitle: "Kembali ke Home"
+        ) {
+            dismiss()
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.bgPrimary.ignoresSafeArea())
     }
+
 }
 
 // MARK: - Selection View
@@ -123,6 +147,8 @@ private struct WouldYouRatherSelectionView: View {
     @Binding var selectedCardID: UUID?
 
     let onConfirm: () -> Void
+    let onDismiss: () -> Void
+    @State private var showsExitConfirmation = false
 
     var body: some View {
         ZStack {
@@ -164,6 +190,17 @@ private struct WouldYouRatherSelectionView: View {
                 confirmButton
             }
             .padding(.horizontal, 32)
+
+            if showsExitConfirmation {
+                SessionExitConfirmation(
+                    title: "Keluar dari Pilihan preferences",
+                    message: "Apakah kamu yakin ingin keluar dari halaman ini?",
+                    continueTitle: "Lanjutkan",
+                    exitTitle: "Home",
+                    onContinue: { showsExitConfirmation = false },
+                    onExit: onDismiss
+                )
+            }
         }
     }
 
@@ -178,17 +215,39 @@ private struct WouldYouRatherSelectionView: View {
                 .font(.title2.bold())
                 .foregroundStyle(.primary)
 
-            Text(
-                "Diskusikan topik mana, yang ingin kalian bahas bersama."
-            )
-            .font(AppFont.bodyRegular)
-            .foregroundStyle(
-                Color.textSecondary
-            )
-            .fixedSize(
-                horizontal: false,
-                vertical: true
-            )
+                Button {
+                    showsExitConfirmation = true
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.title3.weight(.medium))
+                        .foregroundStyle(Color.textPrimaryBlack)
+                        .frame(
+                            width: 44,
+                            height: 44
+                        )
+                        .background(
+                            .white.opacity(0.85)
+                        )
+                        .clipShape(Circle())
+                }
+                .buttonStyle(.plain)
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Bahas yang mana dulu?")
+                    .font(.title2.bold())
+                    .foregroundStyle(Color.textPrimary)
+
+                Text(
+                    "Diskusikan topik mana, yang ingin kalian bahas bersama."
+                )
+                .font(AppFont.bodyRegular)
+                .foregroundStyle(Color.textPrimary)
+                        .fixedSize(
+                            horizontal: false,
+                            vertical: true
+                        )
+            }
         }
     }
 
@@ -738,7 +797,7 @@ private extension Array {
         context.insert($0)
     }
 
-    return WouldYouRatherSelectionView(
+    WouldYouRatherSelectionView(
         cards: cards,
         selectedCardID: $selectedCardID,
         onConfirm: {}

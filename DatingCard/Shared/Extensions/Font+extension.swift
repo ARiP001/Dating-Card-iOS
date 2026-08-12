@@ -8,10 +8,11 @@
 import SwiftUI
 
 enum AppFont {
-    static let largeTitleRegular: Font = .largeTitle
+    
+    static let title1Bold: Font = .title.bold()
     static let largeTitleBold: Font = .largeTitle.bold()
+    static let largeTitleRegular: Font = .largeTitle
     static let title1Regular : Font = .title
-    static let title1Bold : Font = .title.bold()
     static let title2Regular : Font = .title2
     static let title2Bold : Font = .title2.bold()
     static let title3Regular : Font = .title3

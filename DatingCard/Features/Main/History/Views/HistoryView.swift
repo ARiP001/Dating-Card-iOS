@@ -1,15 +1,9 @@
-//
-//  HistoryView.swift
-//  DatingCard
-//
-//  Created by Arif Fathurrahman on 11/08/26.
-//
-
+import SwiftData
 import SwiftUI
 
 struct HistoryView: View {
-    @State private var selectedSession: HistorySession?
-    @State private var sessions = HistorySession.samples
+    @Query(sort: \SessionModel.createdAt, order: .reverse) private var sessions: [SessionModel]
+    @State private var selectedSession: SessionModel?
 
     var body: some View {
         ScrollView {
@@ -19,10 +13,21 @@ struct HistoryView: View {
                     .foregroundStyle(Color.textPrimary)
                     .padding(.bottom, Spacing.sm)
 
-                ForEach(sessions) { session in
+                if sessions.isEmpty {
+                    ContentUnavailableView(
+                        "Belum ada riwayat sesi",
+                        systemImage: "clock.arrow.circlepath",
+                        description: Text("Sesi yang sudah kamu mulai akan muncul di sini.")
+                    )
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, Spacing.xxl)
+                }
+
+                ForEach(sessions, id: \.id) { session in
                     HistorySessionCard(
                         title: session.title,
-                        date: session.date
+                        date: "\(session.createdAt.formatted(.dateTime.day().month(.wide).year().locale(Locale(identifier: "id_ID")))) | \(session.isContinue ? "Belum Selesai" : "Selesai")",
+                        isContinue: session.isContinue
                     ) {
                         selectedSession = session
                     }
@@ -95,9 +100,10 @@ private struct HistorySessionDetailView: View {
                 .padding(.top, Spacing.lg)
 
             Spacer(minLength: Spacing.lg)
-
-            AppButton(title: "Bergantian") { }
-                .padding(.bottom, Spacing.lg)
+            if session.isContinue {
+                AppButton(title: "Lanjutkan sesi") { resumeSession = true }
+                    .padding(.bottom, Spacing.lg)
+            }
         }
         .padding(.horizontal, Spacing.xl)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -137,44 +143,38 @@ private struct HistorySessionDetailView: View {
     private var questionDeck: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHStack(spacing: Spacing.md) {
-                ForEach(session.cards) { card in
-                    QuestionCard(
-                        question: card.question,
-                        topicID: card.topicID
-                    )
+                ForEach(session.pickedCards, id: \.id) { card in
+                    QuestionCard(question: card.question, topicID: card.topicID)
+                }
+                if session.pickedCards.isEmpty {
+                    emptyCard
                 }
             }
-            .scrollTargetLayout()
         }
-        .contentMargins(.horizontal, Spacing.xs, for: .scrollContent)
-        .scrollTargetBehavior(.viewAligned(limitBehavior: .always))
+    }
+
+    private var emptyCard: some View {
+        Text("Belum ada kartu yang dipilih")
+            .font(AppFont.bodyRegular).foregroundStyle(Color.textSecondary)
+            .frame(width: 300, height: 475).background(Color.surfaceSecondary)
+            .clipShape(RoundedRectangle(cornerRadius: Radius.sm))
     }
 
     private var details: some View {
         VStack(alignment: .leading, spacing: Spacing.lg) {
-            VStack(spacing: 0) {
-                Divider()
-
-                HStack {
-                    Text("Cerita yang terbuka")
-                        .font(AppFont.bodyRegular)
-                        .foregroundStyle(Color.textPrimary)
-
-                    Spacer()
-
-                    Text("\(session.openCardsCount) Kartu")
-                        .font(AppFont.bodyBold)
-                        .foregroundStyle(Color.textPrimary)
-                }
-                .padding(.vertical, Spacing.md)
-
-                Divider()
+            Divider()
+            HStack {
+                Text("Cerita yang terbuka").font(AppFont.bodyRegular)
+                Spacer()
+                Text("\(session.pickedCards.count) Kartu").font(AppFont.bodyBold)
             }
-
-            Text(session.summary)
-                .font(AppFont.bodyRegular)
-                .foregroundStyle(Color.textPrimary)
-                .fixedSize(horizontal: false, vertical: true)
+            Divider()
+            Text(session.isContinue ? "Kamu masih memiliki topik untuk dibicarakan dari sesi ini. Kamu bisa melanjutkan sesi ini." : "Semua topik di sesi ini sudah selesai dimainkan.")
+                .font(AppFont.bodyRegular).foregroundStyle(Color.textSecondary)
+            if isEditingTitle {
+                DatePicker("Tanggal sesi", selection: $editedDate, displayedComponents: .date)
+                    .font(AppFont.bodyRegular)
+            }
         }
     }
 
