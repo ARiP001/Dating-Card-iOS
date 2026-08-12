@@ -5,7 +5,6 @@ struct SessionExitConfirmation: View {
     var message: String = "Kalian masih memiliki kartu yang belum dimainkan. Jika sesi diakhiri, kamu dapat melanjutkannya kembali melalui riwayat sesi."
     var continueTitle: String = "Lanjutkan bermain"
     var exitTitle: String = "Akhiri sesi"
-    var exitBackgroundColor: Color = .surfaceSecondary
     let onContinue: () -> Void
     let onExit: () -> Void
 
@@ -21,7 +20,7 @@ struct SessionExitConfirmation: View {
                 Button(action: onExit) {
                     Text(exitTitle).font(AppFont.headlineSemibold).foregroundStyle(.red)
                         .frame(maxWidth: .infinity).padding(.vertical, Spacing.md)
-                        .background(exitBackgroundColor).clipShape(RoundedRectangle(cornerRadius: Radius.clickable))
+                        .background(Color.surfaceSecondary).clipShape(RoundedRectangle(cornerRadius: Radius.clickable))
                 }.buttonStyle(.plain)
             }
             .padding(Spacing.xl).background(Color.bgCard)

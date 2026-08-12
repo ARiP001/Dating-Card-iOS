@@ -32,7 +32,9 @@ struct TopicChip: View {
                 .overlay {
                     Capsule()
                         .stroke(
-                            accentColor,
+                            isSelected
+                            ? accentColor
+                            : Color.textSecondaryDarkGrey,
                             lineWidth: 2
                         )
                 }
