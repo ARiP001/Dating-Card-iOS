@@ -5,41 +5,55 @@ struct HistoryView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \SessionModel.createdAt, order: .reverse) private var sessions: [SessionModel]
     @State private var selectedSession: SessionModel?
+    @State private var pendingSessionToResume: SessionModel?
+    @State private var sessionToResume: SessionModel?
+    @State private var isResumingSession = false
 
     var body: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: Spacing.md) {
-                Text("Kumpulan Ceritamu")
-                    .font(AppFont.title2Bold)
-                    .foregroundStyle(Color.textPrimary)
-                    .padding(.bottom, Spacing.sm)
+        NavigationStack {
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: Spacing.md) {
+                    Text("Kumpulan Ceritamu")
+                        .font(AppFont.title2Bold)
+                        .foregroundStyle(Color.textPrimary)
+                        .padding(.bottom, Spacing.sm)
 
-                if sessions.isEmpty {
-                    ContentUnavailableView(
-                        "Belum ada riwayat sesi",
-                        systemImage: "clock.arrow.circlepath",
-                        description: Text("Sesi yang sudah kamu mulai akan muncul di sini.")
-                    )
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, Spacing.xxl)
-                }
+                    if sessions.isEmpty {
+                        ContentUnavailableView(
+                            "Belum ada riwayat sesi",
+                            systemImage: "clock.arrow.circlepath",
+                            description: Text("Sesi yang sudah kamu mulai akan muncul di sini.")
+                        )
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, Spacing.xxl)
+                    }
 
-                ForEach(sessions, id: \.id) { session in
-                    HistorySessionCard(
-                        title: session.title,
-                        date: "\(session.createdAt.formatted(.dateTime.day().month(.wide).year().locale(Locale(identifier: "id_ID")))) | \(session.isContinue ? "Belum Selesai" : "Selesai")",
-                        isContinue: session.isContinue
-                    ) {
-                        selectedSession = session
+                    ForEach(sessions, id: \.id) { session in
+                        HistorySessionCard(
+                            title: session.title,
+                            date: "\(session.createdAt.formatted(.dateTime.day().month(.wide).year().locale(Locale(identifier: "id_ID")))) | \(session.isContinue ? "Belum Selesai" : "Selesai")",
+                            isContinue: session.isContinue
+                        ) {
+                            selectedSession = session
+                        }
                     }
                 }
+                .padding(.horizontal, Spacing.xl)
+                .padding(.top, Spacing.xxl)
+                .padding(.bottom, Spacing.lg)
             }
-            .padding(.horizontal, Spacing.xl)
-            .padding(.top, Spacing.xxl)
-            .padding(.bottom, Spacing.lg)
+            .background(Color.bgPrimary.ignoresSafeArea())
+            .navigationDestination(isPresented: $isResumingSession) {
+                if let sessionToResume {
+                    WouldYouRatherView(session: sessionToResume)
+                        .toolbar(.hidden, for: .tabBar)
+                }
+            }
         }
-        .background(Color.bgPrimary.ignoresSafeArea())
-        .sheet(item: $selectedSession) { session in
+        .sheet(
+            item: $selectedSession,
+            onDismiss: presentPendingSession
+        ) { session in
             NavigationStack {
                 HistorySessionDetailView(
                     session: session,
@@ -48,6 +62,10 @@ struct HistoryView: View {
                             newTitle,
                             for: session.id
                         )
+                    },
+                    onResume: {
+                        pendingSessionToResume = session
+                        selectedSession = nil
                     }
                 )
             }
@@ -56,6 +74,16 @@ struct HistoryView: View {
             .presentationCornerRadius(Radius.xl)
             .presentationBackground(Color.bgCard)
         }
+    }
+
+    private func presentPendingSession() {
+        guard let pendingSessionToResume else {
+            return
+        }
+
+        self.pendingSessionToResume = nil
+        sessionToResume = pendingSessionToResume
+        isResumingSession = true
     }
 
     private func updateTitle(
@@ -82,19 +110,21 @@ struct HistoryView: View {
 private struct HistorySessionDetailView: View {
     let session: SessionModel
     let onTitleChanged: (String) -> Void
+    let onResume: () -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var title: String
     @State private var draftTitle: String
     @State private var isShowingTitleEditor = false
-    @State private var isResumingSession = false
 
     init(
         session: SessionModel,
-        onTitleChanged: @escaping (String) -> Void
+        onTitleChanged: @escaping (String) -> Void,
+        onResume: @escaping () -> Void
     ) {
         self.session = session
         self.onTitleChanged = onTitleChanged
+        self.onResume = onResume
         _title = State(initialValue: session.title)
         _draftTitle = State(initialValue: session.title)
     }
@@ -110,7 +140,7 @@ private struct HistorySessionDetailView: View {
             Spacer(minLength: Spacing.lg)
             if session.isContinue {
                 AppButton(title: "Lanjutkan sesi") {
-                    isResumingSession = true
+                    onResume()
                 }
                     .padding(.bottom, Spacing.lg)
             }
@@ -147,9 +177,6 @@ private struct HistorySessionDetailView: View {
             }
         } message: {
             Text("Masukkan judul baru untuk sesi ini.")
-        }
-        .navigationDestination(isPresented: $isResumingSession) {
-            WouldYouRatherView(session: session)
         }
     }
 
