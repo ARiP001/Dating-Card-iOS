@@ -178,9 +178,9 @@ private struct WouldYouRatherSelectionView: View {
             } label: {
                 Image(systemName: "xmark")
                     .font(.title3.weight(.medium))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Color.textPrimary)
                     .frame(width: 44, height: 44)
-                    .background(Color.accentPrimary)
+                    .background(.ultraThinMaterial)
                     .clipShape(Circle())
             }
             .buttonStyle(.plain)

@@ -139,30 +139,30 @@ struct GameplayView: View {
     }
 
     // MARK: - Playing Content
-
     private var playingContent: some View {
-        VStack(spacing: Spacing.lg) {
-            ZStack {
-                Text(viewModel.topicName)
-                    .font(AppFont.title2Bold)
-                    .foregroundStyle(Color.textPrimaryBlack)
+            VStack(spacing: Spacing.lg) {
+                ZStack {
+                    Text(viewModel.topicName)
+                        .font(AppFont.title2Bold)
+                        .foregroundStyle(Color.textPrimaryBlack)
 
-                HStack {
-                    Spacer()
+                    HStack {
+                        Spacer()
 
-                    Button {
-                        showsExitConfirmation = true
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.title3.weight(.medium))
-                            .foregroundStyle(.white)
-                            .frame(width: 44, height: 44)
-                            .background(Color.accentPrimary)
-                            .clipShape(Circle())
+                        Button {
+                            showsExitConfirmation = true
+                        } label: {
+                            Image(systemName: "xmark")
+                                .font(.title3.weight(.medium))
+                                .foregroundStyle(Color.textPrimary)
+                                .frame(width: 44, height: 44)
+                                // Menggunakan native material untuk efek liquid/frosted glass
+                                .background(.ultraThinMaterial)
+                                .clipShape(Circle())
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
-            }
 
             ZStack {
                 ForEach(
@@ -327,9 +327,9 @@ struct GameplayView: View {
                     } label: {
                         Image(systemName: "xmark")
                             .font(.title3.weight(.medium))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color.textPrimary)
                             .frame(width: 44, height: 44)
-                            .background(Color.accentPrimary)
+                            .background(.ultraThinMaterial)
                             .clipShape(Circle())
                     }
                     .buttonStyle(.plain)

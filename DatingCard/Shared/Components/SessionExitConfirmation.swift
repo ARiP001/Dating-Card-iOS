@@ -13,11 +13,11 @@ struct SessionExitConfirmation: View {
             Color.black.opacity(0.7).ignoresSafeArea()
             VStack(alignment: .leading, spacing: Spacing.lg) {
                 Text(title)
-                    .font(AppFont.title2Bold)
+                    .font(AppFont.bodyBold)
                 
                 Text(message)
-                    .font(AppFont.title3Regular)
-                    .foregroundStyle(Color.textPrimary)
+                    .font(AppFont.bodyRegular)
+                    .foregroundStyle(Color.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
                 
                 VStack(spacing: Spacing.sm) {
