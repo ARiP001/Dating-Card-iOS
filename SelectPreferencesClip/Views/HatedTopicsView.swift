@@ -15,17 +15,44 @@ struct HatedTopicsView: View {
     let onSubmit: () -> Void
 
     private var availableTopics: [TopicModel] {
-        Topics.all.filter { !selectedTopicIDs.contains($0.id) }
+        Topics.all.filter {
+            !selectedTopicIDs.contains($0.id)
+        }
     }
 
     var body: some View {
-        VStack(spacing: 0) {
+        ZStack(alignment: .topTrailing) {
+            Color.bgPrimary
+                .ignoresSafeArea()
+
+            Circle()
+                .fill(
+                    Color.accentDustyMauve.opacity(0.25)
+                )
+                .frame(
+                    width: 360,
+                    height: 360
+                )
+                .blur(radius: 80)
+                .offset(
+                    x: 120,
+                    y: -120
+                )
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+
             ScrollView {
-                VStack(alignment: .leading, spacing: Spacing.xl) {
+                VStack(
+                    alignment: .leading,
+                    spacing: Spacing.xl
+                ) {
                     backButton
+
                     header
 
-                    AppClipTopicFlowLayout(spacing: Spacing.sm) {
+                    AppClipTopicFlowLayout(
+                        spacing: Spacing.sm
+                    ) {
                         ForEach(availableTopics) { topic in
                             TopicChip(
                                 title: topic.name,
@@ -36,22 +63,37 @@ struct HatedTopicsView: View {
                         }
                     }
                 }
-                .padding(.horizontal, Spacing.lg)
+                .padding(.horizontal, Spacing.xl)
                 .padding(.top, Spacing.md)
-                .padding(.bottom, Spacing.lg)
+                .padding(.bottom, 120)
             }
-
-            AppButton(
-                title: isSubmitting ? "Mengirim..." : "Mulai",
-                isEnabled: !isSubmitting,
-                action: onSubmit
-            )
-            .padding(.horizontal, Spacing.lg)
-            .padding(.bottom, Spacing.lg)
+            .scrollBounceBehavior(.basedOnSize)
         }
-        .background(Color.bgPrimary.ignoresSafeArea())
+        .overlay(alignment: .bottom) {
+            VStack {
+                AppButton(
+                    title: isSubmitting
+                        ? "Mengirim..."
+                        : "Mulai",
+                    isEnabled: !isSubmitting,
+                    action: onSubmit
+                )
+                .padding(.horizontal, Spacing.md)
+            }
+            .padding(Spacing.md)
+            .frame(maxWidth: .infinity)
+            .glassEffect(
+                .regular,
+                in: RoundedRectangle(
+                    cornerRadius: Radius.xl
+                )
+            )
+            .padding(.horizontal, Spacing.md)
+        }
         .toolbar(.hidden, for: .navigationBar)
-        .onAppear(perform: removeSelectedTopicsFromHatedTopics)
+        .onAppear(
+            perform: removeSelectedTopicsFromHatedTopics
+        )
         .onChange(of: selectedTopicIDs) {
             removeSelectedTopicsFromHatedTopics()
         }
@@ -64,8 +106,13 @@ struct HatedTopicsView: View {
             Image(systemName: "chevron.left")
                 .font(AppFont.headlineSemibold)
                 .foregroundStyle(Color.bgCard)
-                .frame(width: 44, height: 44)
-                .background(Color.accentPrimary)
+                .frame(
+                    width: 44,
+                    height: 44
+                )
+                .background(
+                    Color.accentPrimary
+                )
                 .clipShape(Circle())
         }
         .buttonStyle(.plain)
@@ -73,14 +120,25 @@ struct HatedTopicsView: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text("Ada topik yang belum siap\nkamu bagikan?")
-                .font(AppFont.title3Bold)
-                .foregroundStyle(Color.textPrimary)
+        VStack(
+            alignment: .leading,
+            spacing: Spacing.sm
+        ) {
+            Text(
+                "Ada topik yang belum siap\nkamu bagikan?"
+            )
+            .font(AppFont.title3Bold)
+            .foregroundStyle(Color.textPrimary)
 
-            Text("Topik yang kamu pilih tidak akan\nmuncul dalam obrolan kalian.")
-                .font(AppFont.bodyRegular)
-                .foregroundStyle(Color.textSecondary)
+            Text(
+                "Topik yang kamu pilih tidak akan muncul dalam obrolan kalian."
+            )
+            .font(AppFont.bodyRegular)
+            .foregroundStyle(Color.textSecondary)
+            .fixedSize(
+                horizontal: false,
+                vertical: true
+            )
         }
     }
 

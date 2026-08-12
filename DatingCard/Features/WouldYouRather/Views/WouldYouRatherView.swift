@@ -9,13 +9,14 @@ import SwiftData
 import SwiftUI
 
 struct WouldYouRatherView: View {
-    @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @StateObject private var viewModel: WouldYouRatherViewModel
 
     init(topicIDs: [Int]) {
         _viewModel = StateObject(
-            wrappedValue: WouldYouRatherViewModel(topicIDs: topicIDs)
+            wrappedValue: WouldYouRatherViewModel(
+                topicIDs: topicIDs
+            )
         )
     }
 
@@ -54,7 +55,7 @@ struct WouldYouRatherView: View {
                 }
                 .transition(
                     .scale(scale: 0.6)
-                        .combined(with: .opacity)
+                    .combined(with: .opacity)
                 )
                 .zIndex(1)
 
@@ -64,9 +65,6 @@ struct WouldYouRatherView: View {
                     selectedCardID: $viewModel.selectedCardID,
                     onConfirm: {
                         persistSelectedCard()
-                    },
-                    onDismiss: {
-                        dismiss()
                     }
                 )
                 .transition(.opacity)
@@ -77,24 +75,31 @@ struct WouldYouRatherView: View {
                     .zIndex(3)
             }
         }
+        .toolbar(.hidden, for: .navigationBar)
         .animation(
             .easeInOut(duration: 0.35),
             value: viewModel.screenState
         )
         .task {
-            viewModel.prepareSession(in: modelContext)
+            viewModel.prepareSession(
+                in: modelContext
+            )
         }
     }
 
     private var emptyContent: some View {
         VStack(spacing: 16) {
-            Text("Belum ada kartu untuk topik ini")
-                .font(.title3.bold())
+            Text(
+                "Belum ada kartu untuk topik ini"
+            )
+            .font(.title3.bold())
 
-            Text("Coba pilih topik lain dari flow preference.")
-                .font(.body)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
+            Text(
+                "Coba pilih topik lain dari flow preference."
+            )
+            .font(.body)
+            .foregroundStyle(.secondary)
+            .multilineTextAlignment(.center)
         }
         .padding(24)
     }
@@ -111,18 +116,23 @@ struct WouldYouRatherView: View {
 }
 
 // MARK: - Selection View
+
 private struct WouldYouRatherSelectionView: View {
     let cards: [CardModel]
+
     @Binding var selectedCardID: UUID?
+
     let onConfirm: () -> Void
-    let onDismiss: () -> Void
 
     var body: some View {
         ZStack {
             Color.bgPrimary
                 .ignoresSafeArea()
 
-            VStack(alignment: .leading, spacing: 28) {
+            VStack(
+                alignment: .leading,
+                spacing: 28
+            ) {
                 header
 
                 VStack(spacing: -16) {
@@ -135,7 +145,9 @@ private struct WouldYouRatherSelectionView: View {
                             width: 52,
                             height: 52
                         )
-                        .background(Color.accentPrimary)
+                        .background(
+                            Color.accentPrimary
+                        )
                         .clipShape(Circle())
                         .overlay {
                             Circle()
@@ -156,48 +168,32 @@ private struct WouldYouRatherSelectionView: View {
     }
 
     // MARK: - Header
+
     private var header: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Spacer()
+        VStack(
+            alignment: .leading,
+            spacing: 8
+        ) {
+            Text("Bahas yang mana dulu?")
+                .font(.title2.bold())
+                .foregroundStyle(.primary)
 
-                Button {
-                    onDismiss()
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.title3.weight(.medium))
-                        .foregroundStyle(.primary)
-                        .frame(
-                            width: 44,
-                            height: 44
-                        )
-                        .background(
-                            .white.opacity(0.85)
-                        )
-                        .clipShape(Circle())
-                }
-                .buttonStyle(.plain)
-            }
-
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Bahas yang mana dulu?")
-                    .font(.title2.bold())
-                    .foregroundStyle(.primary)
-
-                Text(
-                    "Diskusikan topik mana, yang ingin kalian bahas bersama."
-                )
-                .font(AppFont.bodyRegular)
-                .foregroundStyle(Color.textSecondary)
-                        .fixedSize(
-                            horizontal: false,
-                            vertical: true
-                        )
-            }
+            Text(
+                "Diskusikan topik mana, yang ingin kalian bahas bersama."
+            )
+            .font(AppFont.bodyRegular)
+            .foregroundStyle(
+                Color.textSecondary
+            )
+            .fixedSize(
+                horizontal: false,
+                vertical: true
+            )
         }
     }
 
     // MARK: - Confirm Button
+
     private var confirmButton: some View {
         Button {
             onConfirm()
@@ -206,15 +202,15 @@ private struct WouldYouRatherSelectionView: View {
                 .font(.headline)
                 .foregroundStyle(
                     selectedCardID == nil
-                        ? Color.accentPrimary
-                        : .white
+                    ? Color.accentPrimary
+                    : .white
                 )
                 .frame(maxWidth: .infinity)
                 .frame(height: 56)
                 .background(
                     selectedCardID == nil
-                        ? Color(.systemGray6)
-                        : Color.accentPrimary
+                    ? Color(.systemGray6)
+                    : Color.accentPrimary
                 )
                 .clipShape(
                     RoundedRectangle(
@@ -227,14 +223,17 @@ private struct WouldYouRatherSelectionView: View {
                     )
                     .stroke(
                         Color.accentPrimary,
-                        lineWidth: selectedCardID == nil ? 1.5 : 0
+                        lineWidth:
+                            selectedCardID == nil
+                            ? 1.5
+                            : 0
                     )
                 }
                 .shadow(
                     color: .black.opacity(
                         selectedCardID == nil
-                            ? 0
-                            : 0.16
+                        ? 0
+                        : 0.16
                     ),
                     radius: 8,
                     x: 0,
@@ -242,11 +241,16 @@ private struct WouldYouRatherSelectionView: View {
                 )
         }
         .buttonStyle(.plain)
-        .disabled(selectedCardID == nil)
+        .disabled(
+            selectedCardID == nil
+        )
     }
 
     // MARK: - Option Card
-    private func optionCard(at index: Int) -> some View {
+
+    private func optionCard(
+        at index: Int
+    ) -> some View {
         guard cards.indices.contains(index) else {
             return AnyView(
                 TopicOptionCard(
@@ -265,7 +269,9 @@ private struct WouldYouRatherSelectionView: View {
 
         return AnyView(
             TopicOptionCard(
-                title: topicName(for: card.topicID),
+                title: topicName(
+                    for: card.topicID
+                ),
                 value: card.id,
                 topicID: card.topicID,
                 width: .infinity,
@@ -277,7 +283,9 @@ private struct WouldYouRatherSelectionView: View {
 
     // MARK: - Topic Name
 
-    private func topicName(for topicID: Int) -> String {
+    private func topicName(
+        for topicID: Int
+    ) -> String {
         Topics.all.first {
             $0.id == topicID
         }?.name ?? "Topic \(topicID)"
@@ -349,7 +357,8 @@ private struct WouldYouRatherPickingView: View {
                     )
                     .frame(
                         maxWidth: .infinity,
-                        alignment: phase == .picked
+                        alignment:
+                            phase == .picked
                             ? .leading
                             : .center
                     )
@@ -370,7 +379,10 @@ private struct WouldYouRatherPickingView: View {
                 )
 
                 frozenProgress =
-                    Date().timeIntervalSince(startDate)
+                    Date()
+                    .timeIntervalSince(
+                        startDate
+                    )
                     * 0.75
 
                 withAnimation(
@@ -382,7 +394,8 @@ private struct WouldYouRatherPickingView: View {
                     phase = .picked
                 }
 
-                // Durasi layar "2 Kartu ini terpilih..."
+                // Durasi layar
+                // "2 Kartu ini terpilih..."
                 try? await Task.sleep(
                     nanoseconds: 2_000_000_000
                 )
@@ -394,8 +407,8 @@ private struct WouldYouRatherPickingView: View {
 
     private var subtitleText: String {
         phase == .picked
-            ? "2 Kartu ini terpilih untuk kalian pilih dan mainkan!"
-            : "Mengacak Kartu..."
+        ? "2 Kartu ini terpilih untuk kalian pilih dan mainkan!"
+        : "Mengacak Kartu..."
     }
 
     private var choiceCards: [ChoiceCard] {
@@ -425,13 +438,15 @@ private struct WouldYouRatherPickingView: View {
     // Filter dan prioritaskan kartu terpilih
     // agar masuk 10 teratas.
     private var displayCards: [ChoiceCard] {
-        var guaranteedCards = pickedChoiceCards
+        var guaranteedCards =
+            pickedChoiceCards
 
-        let remainingCards = choiceCards.filter { card in
-            !guaranteedCards.contains {
-                $0.id == card.id
+        let remainingCards =
+            choiceCards.filter { card in
+                !guaranteedCards.contains {
+                    $0.id == card.id
+                }
             }
-        }
 
         guaranteedCards.append(
             contentsOf: remainingCards
@@ -448,7 +463,8 @@ private struct WouldYouRatherPickingView: View {
         progress: Double
     ) -> CardPlacement {
         if phase == .picked {
-            if pickedChoiceCards.first?.id == card.id {
+            if pickedChoiceCards.first?.id
+                == card.id {
                 return CardPlacement(
                     x: -88,
                     y: 0,
@@ -461,7 +477,10 @@ private struct WouldYouRatherPickingView: View {
                 )
             }
 
-            if pickedChoiceCards.dropFirst().first?.id == card.id {
+            if pickedChoiceCards
+                .dropFirst()
+                .first?
+                .id == card.id {
                 return CardPlacement(
                     x: 88,
                     y: 0,
@@ -487,7 +506,10 @@ private struct WouldYouRatherPickingView: View {
         }
 
         let count = Double(
-            min(displayCards.count, 10)
+            min(
+                displayCards.count,
+                10
+            )
         )
 
         let angle =
@@ -499,6 +521,7 @@ private struct WouldYouRatherPickingView: View {
             * .pi
 
         let depth = sin(angle)
+
         let normalizedDepth =
             (depth + 1) / 2
 
@@ -512,14 +535,20 @@ private struct WouldYouRatherPickingView: View {
                 0.35
                 + normalizedDepth * 0.65,
             blur:
-                (1 - normalizedDepth) * 2.2,
-            flip: cos(angle) * 58,
-            tilt: cos(angle) * 10,
-            zIndex: normalizedDepth
+                (1 - normalizedDepth)
+                * 2.2,
+            flip:
+                cos(angle) * 58,
+            tilt:
+                cos(angle) * 10,
+            zIndex:
+                normalizedDepth
         )
     }
 
-    private func topicName(for topicID: Int) -> String {
+    private func topicName(
+        for topicID: Int
+    ) -> String {
         Topics.all.first {
             $0.id == topicID
         }?.name ?? "Topic \(topicID)"
@@ -534,6 +563,7 @@ private struct CarouselPickingView: View {
     let pickedCards: [ChoiceCard]
     let startDate: Date
     let frozenProgress: Double
+
     let placement: (
         Int,
         ChoiceCard,
@@ -543,21 +573,23 @@ private struct CarouselPickingView: View {
     var body: some View {
         TimelineView(.animation) { timeline in
             let elapsed =
-                timeline.date.timeIntervalSince(
+                timeline.date
+                .timeIntervalSince(
                     startDate
                 )
 
             let progress =
                 phase == .picked
-                    ? frozenProgress
-                    : elapsed * 0.75
+                ? frozenProgress
+                : elapsed * 0.75
 
             ZStack {
                 ForEach(
-                    Array(cards.enumerated()),
+                    Array(
+                        cards.enumerated()
+                    ),
                     id: \.element.id
                 ) { index, card in
-
                     let cardPlacement =
                         placement(
                             index,
@@ -576,7 +608,8 @@ private struct CarouselPickingView: View {
                         cardPlacement.opacity
                     )
                     .blur(
-                        radius: cardPlacement.blur
+                        radius:
+                            cardPlacement.blur
                     )
                     .rotation3DEffect(
                         .degrees(
@@ -621,24 +654,28 @@ private extension Array {
         safe index: Int
     ) -> Element? {
         indices.contains(index)
-            ? self[index]
-            : nil
+        ? self[index]
+        : nil
     }
 }
 
 // MARK: - Previews
+
 #Preview("Would You Rather - Full Flow") {
     let container = try! ModelContainer(
-        for: CardModel.self,
-        SessionModel.self,
-        configurations: ModelConfiguration(
-            isStoredInMemoryOnly: true
-        )
+        for:
+            CardModel.self,
+            SessionModel.self,
+        configurations:
+            ModelConfiguration(
+                isStoredInMemoryOnly: true
+            )
     )
 
-    let context = container.mainContext
+    let context =
+        container.mainContext
 
-    // Simulate 5 topics selected by the user.
+    // Simulate topics selected by user.
     let selectedTopicIDs = Array(
         Topics.all
             .shuffled()
@@ -646,11 +683,13 @@ private extension Array {
             .map(\.id)
     )
 
-    // One dummy card for each selected topic.
+    // One dummy card
+    // for each selected topic.
     for topicID in selectedTopicIDs {
         let card = CardModel(
             topicID: topicID,
-            question: "Dummy question for topic \(topicID)"
+            question:
+                "Dummy question for topic \(topicID)"
         )
 
         context.insert(card)
@@ -661,18 +700,23 @@ private extension Array {
     )
     .modelContainer(container)
 }
+
 #Preview("Bahas yang mana dulu?") {
-    @Previewable @State var selectedCardID: UUID?
+    @Previewable @State
+    var selectedCardID: UUID?
 
     let container = try! ModelContainer(
-        for: CardModel.self,
-        SessionModel.self,
-        configurations: ModelConfiguration(
-            isStoredInMemoryOnly: true
-        )
+        for:
+            CardModel.self,
+            SessionModel.self,
+        configurations:
+            ModelConfiguration(
+                isStoredInMemoryOnly: true
+            )
     )
 
-    let context = container.mainContext
+    let context =
+        container.mainContext
 
     let randomTopicIDs = Array(
         Topics.all
@@ -681,12 +725,14 @@ private extension Array {
             .map(\.id)
     )
 
-    let cards = randomTopicIDs.map { topicID in
-        CardModel(
-            topicID: topicID,
-            question: "Dummy question for topic \(topicID)"
-        )
-    }
+    let cards =
+        randomTopicIDs.map { topicID in
+            CardModel(
+                topicID: topicID,
+                question:
+                    "Dummy question for topic \(topicID)"
+            )
+        }
 
     cards.forEach {
         context.insert($0)
@@ -695,8 +741,7 @@ private extension Array {
     return WouldYouRatherSelectionView(
         cards: cards,
         selectedCardID: $selectedCardID,
-        onConfirm: {},
-        onDismiss: {}
+        onConfirm: {}
     )
     .modelContainer(container)
 }

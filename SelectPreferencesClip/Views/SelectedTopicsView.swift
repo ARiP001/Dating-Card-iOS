@@ -11,12 +11,36 @@ struct SelectedTopicsView: View {
     let onContinue: () -> Void
 
     var body: some View {
-        VStack(spacing: 0) {
+        ZStack(alignment: .topTrailing) {
+            Color.bgPrimary
+                .ignoresSafeArea()
+
+            Circle()
+                .fill(
+                    Color.accentDustyMauve.opacity(0.25)
+                )
+                .frame(
+                    width: 360,
+                    height: 360
+                )
+                .blur(radius: 80)
+                .offset(
+                    x: 120,
+                    y: -120
+                )
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+
             ScrollView {
-                VStack(alignment: .leading, spacing: Spacing.xl) {
+                VStack(
+                    alignment: .leading,
+                    spacing: Spacing.xl
+                ) {
                     header
 
-                    AppClipTopicFlowLayout(spacing: Spacing.sm) {
+                    AppClipTopicFlowLayout(
+                        spacing: Spacing.sm
+                    ) {
                         ForEach(Topics.all) { topic in
                             TopicChip(
                                 title: topic.name,
@@ -27,32 +51,54 @@ struct SelectedTopicsView: View {
                         }
                     }
                 }
-                .padding(.horizontal, Spacing.lg)
-                .padding(.top, Spacing.xxl)
-                .padding(.bottom, Spacing.lg)
+                .padding(.horizontal, Spacing.xl)
+                .padding(.top, Spacing.md)
+                .padding(.bottom, 120)
             }
-
-            AppButton(
-                title: "Lanjut",
-                isEnabled: !selectedTopicIDs.isEmpty,
-                action: onContinue
-            )
-            .padding(.horizontal, Spacing.lg)
-            .padding(.bottom, Spacing.lg)
+            .scrollBounceBehavior(.basedOnSize)
         }
-        .background(Color.bgPrimary.ignoresSafeArea())
+        .overlay(alignment: .bottom) {
+            VStack {
+                AppButton(
+                    title: "Lanjut",
+                    isEnabled: !selectedTopicIDs.isEmpty,
+                    action: onContinue
+                )
+                .padding(.horizontal, Spacing.md)
+            }
+            .padding(Spacing.md)
+            .frame(maxWidth: .infinity)
+            .glassEffect(
+                .regular,
+                in: RoundedRectangle(
+                    cornerRadius: Radius.xl
+                )
+            )
+            .padding(.horizontal, Spacing.md)
+        }
         .toolbar(.hidden, for: .navigationBar)
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text("Apa yang ingin kamu ketahui\ntentang satu sama lain?")
-                .font(AppFont.title3Bold)
-                .foregroundStyle(Color.textPrimary)
+        VStack(
+            alignment: .leading,
+            spacing: Spacing.sm
+        ) {
+            Text(
+                "Apa yang ingin kamu ketahui\ntentang satu sama lain?"
+            )
+            .font(AppFont.title3Bold)
+            .foregroundStyle(Color.textPrimary)
 
-            Text("Pilihanmu akan jadi referensi topik\npertanyaan untuk obrolan kalian nanti.")
-                .font(AppFont.bodyRegular)
-                .foregroundStyle(Color.textSecondary)
+            Text(
+                "Pilihanmu akan jadi referensi topik pertanyaan untuk obrolan kalian nanti."
+            )
+            .font(AppFont.bodyRegular)
+            .foregroundStyle(Color.textSecondary)
+            .fixedSize(
+                horizontal: false,
+                vertical: true
+            )
         }
     }
 
@@ -74,33 +120,57 @@ struct AppClipTopicFlowLayout: Layout {
         subviews: Subviews,
         cache: inout ()
     ) -> CGSize {
-        let maximumWidth = proposal.width ?? .infinity
+        let maximumWidth =
+            proposal.width ?? .infinity
+
         var rowWidth: CGFloat = 0
         var rowHeight: CGFloat = 0
         var totalHeight: CGFloat = 0
         var contentWidth: CGFloat = 0
 
         for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
-            let nextWidth = rowWidth == 0 ? size.width : rowWidth + spacing + size.width
+            let size =
+                subview.sizeThatFits(.unspecified)
 
-            if nextWidth > maximumWidth, rowWidth > 0 {
-                contentWidth = max(contentWidth, rowWidth)
-                totalHeight += rowHeight + spacing
+            let nextWidth =
+                rowWidth == 0
+                ? size.width
+                : rowWidth + spacing + size.width
+
+            if nextWidth > maximumWidth,
+               rowWidth > 0 {
+                contentWidth = max(
+                    contentWidth,
+                    rowWidth
+                )
+
+                totalHeight +=
+                    rowHeight + spacing
+
                 rowWidth = size.width
                 rowHeight = size.height
             } else {
                 rowWidth = nextWidth
-                rowHeight = max(rowHeight, size.height)
+
+                rowHeight = max(
+                    rowHeight,
+                    size.height
+                )
             }
         }
 
-        contentWidth = max(contentWidth, rowWidth)
+        contentWidth = max(
+            contentWidth,
+            rowWidth
+        )
+
         totalHeight += rowHeight
 
         return CGSize(
-            width: proposal.width ?? contentWidth,
-            height: totalHeight
+            width:
+                proposal.width ?? contentWidth,
+            height:
+                totalHeight
         )
     }
 
@@ -115,28 +185,47 @@ struct AppClipTopicFlowLayout: Layout {
         var rowHeight: CGFloat = 0
 
         for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
+            let size =
+                subview.sizeThatFits(.unspecified)
 
-            if x > bounds.minX, x + size.width > bounds.maxX {
+            if x > bounds.minX,
+               x + size.width > bounds.maxX {
                 x = bounds.minX
                 y += rowHeight + spacing
                 rowHeight = 0
             }
 
             subview.place(
-                at: CGPoint(x: x, y: y),
+                at: CGPoint(
+                    x: x,
+                    y: y
+                ),
                 anchor: .topLeading,
-                proposal: ProposedViewSize(size)
+                proposal: ProposedViewSize(
+                    width: size.width,
+                    height: size.height
+                )
             )
 
             x += size.width + spacing
-            rowHeight = max(rowHeight, size.height)
+
+            rowHeight = max(
+                rowHeight,
+                size.height
+            )
         }
     }
 }
 
 #Preview {
+    @Previewable @State
+    var selectedTopicIDs: Set<Int> = [
+        2,
+        7,
+        19
+    ]
+
     SelectedTopicsView(
-        selectedTopicIDs: .constant([2, 7, 19])
+        selectedTopicIDs: $selectedTopicIDs
     ) { }
 }

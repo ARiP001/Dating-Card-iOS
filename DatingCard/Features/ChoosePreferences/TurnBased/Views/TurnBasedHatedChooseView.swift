@@ -2,26 +2,57 @@
 //  TurnBasedHatedChooseView.swift
 //  DatingCard
 //
+//
+//  TurnBasedHatedChooseView.swift
+//  DatingCard
+//
 
 import SwiftUI
 
 struct TurnBasedHatedChooseView: View {
     let selectedTopicIDs: Set<Int>
+
     @Binding var hatedTopicIDs: Set<Int>
 
     let onSubmit: () -> Void
 
     private var availableTopics: [TopicModel] {
-        Topics.all.filter { !selectedTopicIDs.contains($0.id) }
+        Topics.all.filter {
+            !selectedTopicIDs.contains($0.id)
+        }
     }
 
     var body: some View {
-        VStack(spacing: 0) {
+        ZStack(alignment: .topTrailing) {
+            Color.bgPrimary
+                .ignoresSafeArea()
+
+            Circle()
+                .fill(
+                    Color.accentDustyMauve.opacity(0.25)
+                )
+                .frame(
+                    width: 360,
+                    height: 360
+                )
+                .blur(radius: 80)
+                .offset(
+                    x: 120,
+                    y: -120
+                )
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+
             ScrollView {
-                VStack(alignment: .leading, spacing: Spacing.xl) {
+                VStack(
+                    alignment: .leading,
+                    spacing: Spacing.xl
+                ) {
                     header
 
-                    TurnBasedTopicFlowLayout(spacing: Spacing.sm) {
+                    TurnBasedTopicFlowLayout(
+                        spacing: Spacing.sm
+                    ) {
                         ForEach(availableTopics) { topic in
                             TopicChip(
                                 title: topic.name,
@@ -34,31 +65,56 @@ struct TurnBasedHatedChooseView: View {
                 }
                 .padding(.horizontal, Spacing.xl)
                 .padding(.top, Spacing.md)
-                .padding(.bottom, Spacing.lg)
+                .padding(.bottom, 120)
             }
             .scrollBounceBehavior(.basedOnSize)
-
-            AppButton(title: "Mulai", action: onSubmit)
-                .padding(.horizontal, Spacing.xl)
-                .padding(.vertical, Spacing.lg)
         }
-        .background(Color.bgPrimary.ignoresSafeArea())
-        .onAppear(perform: removeSelectedTopicsFromHatedTopics)
+        .overlay(alignment: .bottom) {
+            VStack {
+                AppButton(
+                    title: "Mulai",
+                    action: onSubmit
+                )
+                .padding(.horizontal, Spacing.md)
+            }
+            .padding(Spacing.md)
+            .frame(maxWidth: .infinity)
+            .glassEffect(
+                .regular,
+                in: RoundedRectangle(
+                    cornerRadius: Radius.xl
+                )
+            )
+            .padding(.horizontal, Spacing.md)
+        }
+        .onAppear(
+            perform: removeSelectedTopicsFromHatedTopics
+        )
         .onChange(of: selectedTopicIDs) {
             removeSelectedTopicsFromHatedTopics()
         }
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text("Ada topik yang belum siap\nkamu bagikan?")
-                .font(AppFont.title3Bold)
-                .foregroundStyle(Color.textPrimary)
+        VStack(
+            alignment: .leading,
+            spacing: Spacing.sm
+        ) {
+            Text(
+                "Ada topik yang belum siap\nkamu bagikan?"
+            )
+            .font(AppFont.title3Bold)
+            .foregroundStyle(Color.textPrimary)
 
-            Text("Topik yang kamu pilih tidak akan muncul dalam obrolan kalian.")
-                .font(AppFont.bodyRegular)
-                .foregroundStyle(Color.textSecondary)
-                .fixedSize(horizontal: false, vertical: true)
+            Text(
+                "Topik yang kamu pilih tidak akan muncul dalam obrolan kalian."
+            )
+            .font(AppFont.bodyRegular)
+            .foregroundStyle(Color.textSecondary)
+            .fixedSize(
+                horizontal: false,
+                vertical: true
+            )
         }
     }
 

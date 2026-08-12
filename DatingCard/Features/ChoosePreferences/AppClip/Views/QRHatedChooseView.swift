@@ -7,6 +7,7 @@ import SwiftUI
 
 struct QRHatedChooseView: View {
     let selectedTopicIDs: Set<Int>
+
     @Binding var hatedTopicIDs: Set<Int>
 
     let onSubmit: () -> Void
@@ -18,12 +19,36 @@ struct QRHatedChooseView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
+        ZStack(alignment: .topTrailing) {
+            Color.bgPrimary
+                .ignoresSafeArea()
+
+            Circle()
+                .fill(
+                    Color.accentDustyMauve.opacity(0.25)
+                )
+                .frame(
+                    width: 360,
+                    height: 360
+                )
+                .blur(radius: 80)
+                .offset(
+                    x: 120,
+                    y: -120
+                )
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+
             ScrollView {
-                VStack(alignment: .leading, spacing: Spacing.xl) {
+                VStack(
+                    alignment: .leading,
+                    spacing: Spacing.xl
+                ) {
                     header
 
-                    TopicFlowLayout(spacing: Spacing.sm) {
+                    TopicFlowLayout(
+                        spacing: Spacing.sm
+                    ) {
                         ForEach(availableTopics) { topic in
                             TopicChip(
                                 title: topic.name,
@@ -35,36 +60,54 @@ struct QRHatedChooseView: View {
                     }
                 }
                 .padding(.horizontal, Spacing.xl)
-                .padding(.top, Spacing.lg)
-                .padding(.bottom, Spacing.lg)
+                .padding(.top, Spacing.md)
+                .padding(.bottom, 120)
             }
             .scrollBounceBehavior(.basedOnSize)
-
-            AppButton(
-                title: "Mulai",
-                action: onSubmit
-            )
-            .padding(.horizontal, Spacing.xl)
-            .padding(.vertical, Spacing.lg)
         }
-        .background(Color.bgPrimary.ignoresSafeArea())
+        .overlay(alignment: .bottom) {
+            VStack {
+                AppButton(
+                    title: "Mulai",
+                    action: onSubmit
+                )
+                .padding(.horizontal, Spacing.md)
+            }
+            .padding(Spacing.md)
+            .frame(maxWidth: .infinity)
+            .glassEffect(
+                .regular,
+                in: RoundedRectangle(
+                    cornerRadius: Radius.xl
+                )
+            )
+            .padding(.horizontal, Spacing.md)
+        }
         .onAppear {
             hatedTopicIDs.subtract(selectedTopicIDs)
         }
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            Text("Ada topik yang belum siap\nkamu bagikan?")
-                .font(AppFont.title3Bold)
-                .foregroundStyle(Color.textPrimary)
+        VStack(
+            alignment: .leading,
+            spacing: Spacing.sm
+        ) {
+            Text(
+                "Ada topik yang belum siap\nkamu bagikan?"
+            )
+            .font(AppFont.title3Bold)
+            .foregroundStyle(Color.textPrimary)
 
             Text(
                 "Topik yang kamu pilih tidak akan muncul dalam obrolan kalian."
             )
             .font(AppFont.bodyRegular)
             .foregroundStyle(Color.textSecondary)
-            .fixedSize(horizontal: false, vertical: true)
+            .fixedSize(
+                horizontal: false,
+                vertical: true
+            )
         }
     }
 
@@ -77,12 +120,16 @@ struct QRHatedChooseView: View {
     }
 }
 
-//#Preview {
-//    @Previewable @State var hatedTopicIDs: Set<Int> = [7, 14]
-//
-//    QRHatedChooseView(
-//        selectedTopicIDs: [1, 2, 6],
-//        hatedTopicIDs: $hatedTopicIDs,
-//        onSubmit: { }
-//    )
-//}
+#Preview {
+    @Previewable @State
+    var hatedTopicIDs: Set<Int> = [
+        7,
+        14
+    ]
+
+    QRHatedChooseView(
+        selectedTopicIDs: [1, 2, 6],
+        hatedTopicIDs: $hatedTopicIDs,
+        onSubmit: { }
+    )
+}

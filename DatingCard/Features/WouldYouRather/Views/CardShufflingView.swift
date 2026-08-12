@@ -22,7 +22,6 @@ struct CardShufflingView: View {
 
     var body: some View {
         ZStack {
-            // Background Gradient
             LinearGradient(
                 stops: [
                     .init(color: .bgPrimary, location: 0.0),
@@ -33,11 +32,9 @@ struct CardShufflingView: View {
                 endPoint: .bottom
             )
             .ignoresSafeArea()
-            
-            // Concentric Dashed Circles Overlay
+
             ConcentricDashedCirclesView()
 
-            // Main Content
             VStack(alignment: .leading, spacing: 24) {
                 Spacer()
 
@@ -50,31 +47,36 @@ struct CardShufflingView: View {
 
                 Spacer()
 
-                Text("Letakkan device ini di tempat yang dapat kalian berdua lihat bersama")
-                    .font(AppFont.largeTitleBold)
-                    .foregroundStyle(Color.textSecondaryWhite)
-                    .multilineTextAlignment(.leading)
-                    .padding(.horizontal, 4)
+                Text(
+                    "Letakkan device ini di tempat yang dapat kalian berdua lihat bersama"
+                )
+                .font(AppFont.largeTitleBold)
+                .foregroundStyle(Color.textSecondaryWhite)
+                .multilineTextAlignment(.leading)
+                .padding(.horizontal, 4)
 
                 Spacer()
 
                 Button {
                     guard !isTransitioning else { return }
                     isTransitioning = true
-                    
+
                     Task {
-                        // 1. Hentikan animasi shuffling
                         viewModel.stopLoop()
-                        
-                        // 2. Animasikan kartu kembali ke posisi bertumpuk (stacked / step 0)
-                        withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) {
+
+                        withAnimation(
+                            .spring(
+                                response: 0.45,
+                                dampingFraction: 0.85
+                            )
+                        ) {
                             viewModel.shuffleStep = 0
                         }
-                        
-                        // 3. Tunggu kartu selesai menumpuk sempurna sesuai gambar
-                        try? await Task.sleep(nanoseconds: 450_000_000)
-                        
-                        // 4. Lanjut ke layar picking
+
+                        try? await Task.sleep(
+                            nanoseconds: 450_000_000
+                        )
+
                         onContinue?()
                     }
                 } label: {
@@ -84,8 +86,15 @@ struct CardShufflingView: View {
                         .frame(maxWidth: .infinity)
                         .frame(height: 56)
                         .background(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 28))
-                        .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
+                        .clipShape(
+                            RoundedRectangle(cornerRadius: 28)
+                        )
+                        .shadow(
+                            color: .black.opacity(0.1),
+                            radius: 8,
+                            x: 0,
+                            y: 4
+                        )
                 }
                 .buttonStyle(.plain)
             }
@@ -93,6 +102,7 @@ struct CardShufflingView: View {
             .padding(.bottom, 34)
             .padding(.top, 64)
         }
+        .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             viewModel.startLoop()
         }

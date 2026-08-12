@@ -85,6 +85,7 @@ struct TurnBasedPreferencesView: View {
                 selectedTopicIDs: currentSelectedTopicIDs,
                 onContinue: showHatedTopics
             )
+            .navigationBarBackButtonHidden(turn == .partner)
 
         case .wouldYouRather:
             WouldYouRatherView(topicIDs: combinedTopicIDs)
@@ -186,3 +187,4 @@ private struct TurnAlert: View {
 #Preview {
     TurnBasedPreferencesView()
 }
+
