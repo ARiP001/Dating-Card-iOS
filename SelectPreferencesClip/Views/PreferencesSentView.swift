@@ -114,16 +114,16 @@ struct PreferencesSentView: View {
             VStack(alignment: .leading, spacing: 0) {
                 VStack(alignment: .leading, spacing: Spacing.xl) {
                     VStack(alignment: .leading, spacing: Spacing.sm) {
-                        Text("Preferensi\nTerkirim")
+                        Text("Topik Pilihanmu Sudah Terkirim")
                             .font(AppFont.title1Bold)
                             .foregroundStyle(Color.textPrimary)
 
-                        Text(
-                            "Pilihanmu sudah berhasil dikirim ke perangkat utama."
-                        )
-                        .font(AppFont.bodyRegular)
-                        .foregroundStyle(Color.textPrimary)
-                        .fixedSize(horizontal: false, vertical: true)
+//                        Text(
+//                            "Topik pilihanmu sudah berhasil dikirim ke perangkat utama."
+//                        )
+//                        .font(AppFont.bodyRegular)
+//                        .foregroundStyle(Color.textPrimary)
+//                        .fixedSize(horizontal: false, vertical: true)
                     }
 
                     Text(
