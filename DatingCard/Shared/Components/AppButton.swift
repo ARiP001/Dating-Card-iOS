@@ -14,6 +14,7 @@ struct AppButton: View {
     let title: String
     var variant: AppButtonVariant = .primary
     var isEnabled: Bool = true
+    var accentColor: Color = .accentPrimary
     let action: () -> Void
 
     var body: some View {
@@ -38,11 +39,11 @@ struct AppButton: View {
     }
 
     private var foregroundColor: Color {
-        variant == .primary ? .bgCard : .accentPrimary
+        variant == .primary ? .bgCard : accentColor
     }
 
     private var backgroundColor: Color {
-        variant == .primary ? .accentPrimary : .bgCard
+        variant == .primary ? accentColor : .bgCard
     }
 }
 #Preview {

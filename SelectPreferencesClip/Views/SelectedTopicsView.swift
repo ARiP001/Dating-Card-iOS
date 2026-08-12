@@ -17,7 +17,7 @@ struct SelectedTopicsView: View {
 
             Circle()
                 .fill(
-                    Color.accentDustyMauve.opacity(0.25)
+                    Color.brandPrimaryRosePink.opacity(0.25)
                 )
                 .frame(
                     width: 360,
@@ -44,7 +44,8 @@ struct SelectedTopicsView: View {
                         ForEach(Topics.all) { topic in
                             TopicChip(
                                 title: topic.name,
-                                isSelected: selectedTopicIDs.contains(topic.id)
+                                isSelected: selectedTopicIDs.contains(topic.id),
+                                accentColor: .brandPrimaryRosePink
                             ) {
                                 toggle(topic.id)
                             }
@@ -62,6 +63,7 @@ struct SelectedTopicsView: View {
                 AppButton(
                     title: "Lanjut",
                     isEnabled: !selectedTopicIDs.isEmpty,
+                    accentColor: .brandPrimaryRosePink,
                     action: onContinue
                 )
                 .padding(.horizontal, Spacing.md)

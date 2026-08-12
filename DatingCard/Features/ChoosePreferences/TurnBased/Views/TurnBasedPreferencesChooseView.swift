@@ -7,6 +7,7 @@ import SwiftUI
 
 struct TurnBasedPreferencesChooseView: View {
     @Binding var selectedTopicIDs: Set<Int>
+    let accentColor: Color
 
     let onContinue: () -> Void
 
@@ -17,7 +18,7 @@ struct TurnBasedPreferencesChooseView: View {
 
             Circle()
                 .fill(
-                    Color.accentDustyMauve.opacity(0.25)
+                    accentColor.opacity(0.25)
                 )
                 .frame(
                     width: 360,
@@ -44,7 +45,8 @@ struct TurnBasedPreferencesChooseView: View {
                         ForEach(Topics.all) { topic in
                             TopicChip(
                                 title: topic.name,
-                                isSelected: selectedTopicIDs.contains(topic.id)
+                                isSelected: selectedTopicIDs.contains(topic.id),
+                                accentColor: accentColor
                             ) {
                                 toggle(topic.id)
                             }
@@ -62,6 +64,7 @@ struct TurnBasedPreferencesChooseView: View {
                 AppButton(
                     title: "Lanjut",
                     isEnabled: !selectedTopicIDs.isEmpty,
+                    accentColor: accentColor,
                     action: onContinue
                 )
                 .padding(.horizontal, Spacing.md)
@@ -180,6 +183,7 @@ struct TurnBasedTopicFlowLayout: Layout {
 #Preview {
     TurnBasedPreferencesChooseView(
         selectedTopicIDs: .constant([2, 7, 19]),
+        accentColor: .accentDustyMauve,
         onContinue: { }
     )
 }
