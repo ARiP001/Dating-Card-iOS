@@ -18,29 +18,37 @@ struct TopicOptionCard<Value: Hashable>: View {
         Button {
             selection = value
         } label: {
-            VStack(spacing: Spacing.md) {
-                if let icon {
-                    icon
+            ZStack {
+                if let topicID {
+                    Image(topicID: topicID, context: .wouldYouRather)
                         .resizable()
-                        .scaledToFit()
-                        .frame(
-                            width: 44,
-                            height: 44
-                        )
+                        .scaledToFill()
+                        .opacity(isSelected ? 1.0 : 0.85)
+                }
+
+                VStack(spacing: Spacing.md) {
+                    if let icon {
+                        icon
+                            .resizable()
+                            .scaledToFit()
+                            .frame(
+                                width: 44,
+                                height: 44
+                            )
+                            .foregroundStyle(
+                                foregroundColor
+                            )
+                    }
+                    Text(title)
+                        .font(AppFont.bodyBold)
                         .foregroundStyle(
                             foregroundColor
                         )
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
                 }
-
-                Text(title)
-                    .font(AppFont.bodyBold)
-                    .foregroundStyle(
-                        foregroundColor
-                    )
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
+                .padding(Spacing.md)
             }
-            .padding(Spacing.md)
             .frame(
                 maxWidth: width == .infinity
                     ? .infinity
@@ -90,7 +98,6 @@ struct TopicOptionCard<Value: Hashable>: View {
                 ? .accentPrimary
                 : .bgCard
         }
-
         return isSelected
             ? Color.accentPrimary
             : Color.topicColor(
@@ -105,7 +112,6 @@ struct TopicOptionCard<Value: Hashable>: View {
                 ? .accentPrimary
                 : .border
         }
-
         return Color.topicColor(
             for: topicID
         )
@@ -114,7 +120,6 @@ struct TopicOptionCard<Value: Hashable>: View {
 
 #Preview {
     @Previewable @State var selection: String? = "thoughts"
-
     VStack(spacing: Spacing.md) {
         TopicOptionCard(
             title: "Tentang Diriku",
@@ -123,7 +128,6 @@ struct TopicOptionCard<Value: Hashable>: View {
             topicID: 1,
             selection: $selection
         )
-
         TopicOptionCard(
             title: "Isi Pikiran",
             value: "thoughts",

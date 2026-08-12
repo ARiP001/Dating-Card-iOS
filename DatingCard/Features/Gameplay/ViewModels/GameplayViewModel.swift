@@ -11,13 +11,21 @@ import SwiftData
 
 @MainActor
 final class GameplayViewModel: ObservableObject {
-    enum State { case loading, playing, packFinished, sessionFinished, loadFailed }
+    enum State {
+        case loading
+        case playing
+        case packFinished
+        case sessionFinished
+        case loadFailed
+    }
 
     @Published private(set) var state: State = .loading
     @Published private(set) var cards: [CardModel] = []
     @Published private(set) var currentIndex = 0
+
     let session: SessionModel
     let topicID: Int
+
     private var isResolvingSwipe = false
 
     init(session: SessionModel, topicID: Int) {
@@ -25,8 +33,27 @@ final class GameplayViewModel: ObservableObject {
         self.topicID = topicID
     }
 
-    var topicName: String { Topics.all.first(where: { $0.id == topicID })?.name ?? "Topik" }
-    var currentCard: CardModel? { cards.indices.contains(currentIndex) ? cards[currentIndex] : nil }
+    #if DEBUG
+    init(
+        previewSession: SessionModel,
+        topicID: Int,
+        previewState: State
+    ) {
+        self.session = previewSession
+        self.topicID = topicID
+        self.state = previewState
+    }
+    #endif
+
+    var topicName: String {
+        Topics.all.first(where: { $0.id == topicID })?.name ?? "Topik"
+    }
+
+    var currentCard: CardModel? {
+        cards.indices.contains(currentIndex)
+            ? cards[currentIndex]
+            : nil
+    }
 
     func prepare(in context: ModelContext) {
         guard state == .loading else { return }
@@ -59,28 +86,63 @@ final class GameplayViewModel: ObservableObject {
         }
     }
 
-    func recordSwipe(_ direction: SwipeDirection, in context: ModelContext) {
-        guard state == .playing, !isResolvingSwipe, let card = currentCard else { return }
+    func recordSwipe(
+        _ direction: SwipeDirection,
+        in context: ModelContext
+    ) {
+        guard
+            state == .playing,
+            !isResolvingSwipe,
+            let card = currentCard
+        else {
+            return
+        }
+
         isResolvingSwipe = true
+
         if direction == .right {
             card.isPicked = true
-            if !session.pickedCards.contains(where: { $0.id == card.id }) { session.pickedCards.append(card) }
+
+            if !session.pickedCards.contains(
+                where: { $0.id == card.id }
+            ) {
+                session.pickedCards.append(card)
+            }
         }
+
         if currentIndex == cards.count - 1 {
-            session.currentTopicIDs.removeAll { $0 == topicID }
+            session.currentTopicIDs.removeAll {
+                $0 == topicID
+            }
+
             session.lastIndex = 4
             session.isContinue = !session.currentTopicIDs.isEmpty
-            state = session.currentTopicIDs.isEmpty ? .sessionFinished : .packFinished
+
+            state = session.currentTopicIDs.isEmpty
+                ? .sessionFinished
+                : .packFinished
+
         } else {
             currentIndex += 1
             session.lastIndex = currentIndex
         }
-        do { try context.save() } catch { print("Failed to save gameplay progress: \(error)") }
+
+        do {
+            try context.save()
+        } catch {
+            print(
+                "Failed to save gameplay progress: \(error)"
+            )
+        }
+
         isResolvingSwipe = false
     }
 
     func keepSessionAvailable(in context: ModelContext) {
-        guard !session.currentTopicIDs.isEmpty else { return }
+        guard !session.currentTopicIDs.isEmpty else {
+            return
+        }
+
         session.isContinue = true
         try? context.save()
     }

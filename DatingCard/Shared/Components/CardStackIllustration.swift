@@ -11,35 +11,36 @@ struct CardStackIllustration: View {
 
     var body: some View {
         ZStack {
-            card
+            card(color: Color.brandPrimaryRosePink)
                 .rotationEffect(.degrees(-9))
                 .offset(x: -14, y: 8)
 
-            card
+            card(color: Color.accentDarkTaupe)
                 .rotationEffect(.degrees(7))
                 .offset(x: 14, y: 8)
 
-            RoundedRectangle(cornerRadius: Radius.sm)
-                .fill(Color.surfaceSecondary)
-                .overlay {
-                    RoundedRectangle(cornerRadius: Radius.sm)
-                        .stroke(Color.border, lineWidth: 1)
-                }
-                .frame(width: width, height: height)
+            card(color: Color.accentDustyMauve)
         }
-        .frame(width: width + Spacing.xl, height: height + Spacing.lg)
+        .frame(
+            width: width + Spacing.xl,
+            height: height + Spacing.lg
+        )
         .accessibilityHidden(true)
     }
 
-    private var card: some View {
+    private func card(color: Color) -> some View {
         RoundedRectangle(cornerRadius: Radius.sm)
-            .fill(Color.bgCard)
+            .fill(color)
             .overlay {
                 RoundedRectangle(cornerRadius: Radius.sm)
                     .stroke(Color.border, lineWidth: 1)
             }
             .frame(width: width, height: height)
-            .shadow(color: Color.textPrimary.opacity(0.08), radius: 4, y: 2)
+            .shadow(
+                color: Color.textPrimary.opacity(0.08),
+                radius: 4,
+                y: 2
+            )
     }
 }
 

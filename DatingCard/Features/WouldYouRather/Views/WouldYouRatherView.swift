@@ -141,7 +141,6 @@ struct WouldYouRatherView: View {
 }
 
 // MARK: - Selection View
-
 private struct WouldYouRatherSelectionView: View {
     let cards: [CardModel]
 
@@ -152,100 +151,76 @@ private struct WouldYouRatherSelectionView: View {
     @State private var showsExitConfirmation = false
 
     var body: some View {
-        ZStack {
-            Color.bgPrimary
-                .ignoresSafeArea()
-
+        ZStack(alignment: .topTrailing) {
+            Color.bgPrimary.ignoresSafeArea()
             VStack(
                 alignment: .leading,
-                spacing: 28
+                spacing: 12
             ) {
                 header
-
-                VStack(spacing: -16) {
+                VStack(spacing: 16) {
                     optionCard(at: 0)
-
-                    Text("Or")
-                        .font(.headline)
-                        .foregroundStyle(.white)
-                        .frame(
-                            width: 52,
-                            height: 52
-                        )
-                        .background(
-                            Color.accentPrimary
-                        )
-                        .clipShape(Circle())
-                        .overlay {
-                            Circle()
-                                .stroke(
-                                    .white,
-                                    lineWidth: 5
-                                )
-                        }
-                        .zIndex(1)
-
                     optionCard(at: 1)
                 }
+                .padding(.top, 8)
+
+                Spacer()
 
                 confirmButton
             }
             .padding(.horizontal, 32)
+            .padding(.top, 64)
+            .padding(.bottom, 32)
+
+            // MARK: - Close Button (Header Top Trailing)
+            Button {
+                showsExitConfirmation = true
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.title3.weight(.medium))
+                    .foregroundStyle(.white)
+                    .frame(width: 44, height: 44)
+                    .background(Color.accentPrimary)
+                    .clipShape(Circle())
+            }
+            .buttonStyle(.plain)
+            .padding(.top, Spacing.md)
+            .padding(.trailing, Spacing.xl)
 
             if showsExitConfirmation {
                 SessionExitConfirmation(
-                    title: "Keluar dari Pilihan preferences",
-                    message: "Apakah kamu yakin ingin keluar dari halaman ini?",
-                    continueTitle: "Lanjutkan",
-                    exitTitle: "Home",
+                    title: "Hentikan Pemilihan Topik?",
+                    message: "Jika sesi ini diakhiri sekarang, kamu dapat melanjutkannya kembali melalui riwayat permainan.",
+                    continueTitle: "Lanjutkan Pemilihan Topik",
+                    exitTitle: "Keluar",
                     onContinue: { showsExitConfirmation = false },
                     onExit: onDismiss
                 )
+                .zIndex(2)
             }
         }
     }
 
-    // MARK: - Header
+    // MARK: - Header (Body Section)
 
     private var header: some View {
         VStack(
             alignment: .leading,
             spacing: 8
         ) {
-            HStack(alignment: .top) {
-                Text("Bahas yang mana dulu?")
-                    .font(.title2.bold())
-                    .foregroundStyle(Color.textPrimary)
-
-                Spacer()
-
-                Button {
-                    showsExitConfirmation = true
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.title3.weight(.medium))
-                        .foregroundStyle(Color.textPrimaryBlack)
-                        .frame(
-                            width: 44,
-                            height: 44
-                        )
-                        .background(
-                            .white.opacity(0.85)
-                        )
-                        .clipShape(Circle())
-                }
-                .buttonStyle(.plain)
-            }
+            Text("Pilih Topik yang Ingin Dibahas")
+                .font(.title2.bold())
+                .foregroundStyle(Color.textPrimary)
 
             Text(
-                "Diskusikan topik mana, yang ingin kalian bahas bersama."
+                "Diskusikan topik mana yang ingin kalian bahas bersama."
             )
-                .font(AppFont.bodyRegular)
-                .foregroundStyle(Color.textPrimary)
-                .fixedSize(
-                    horizontal: false,
-                    vertical: true
-                )
+            .font(AppFont.bodyRegular)
+            .foregroundStyle(Color.textPrimary)
+            .fixedSize(
+                horizontal: false,
+                vertical: true
+            )
         }
     }
 
@@ -255,7 +230,7 @@ private struct WouldYouRatherSelectionView: View {
         Button {
             onConfirm()
         } label: {
-            Text("Kami pilih ini")
+            Text("Kami Pilih Ini")
                 .font(.headline)
                 .foregroundStyle(
                     selectedCardID == nil
@@ -402,7 +377,7 @@ private struct WouldYouRatherPickingView: View {
                 Spacer()
 
                 Text(subtitleText)
-                    .font(AppFont.largeTitleBold)
+                    .font(AppFont.title1Bold)
                     .foregroundStyle(
                         Color.textSecondaryWhite
                     )

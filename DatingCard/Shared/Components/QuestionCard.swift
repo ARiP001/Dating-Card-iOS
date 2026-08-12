@@ -2,7 +2,6 @@
 //  QuestionCard.swift
 //  DatingCard
 //
-
 import SwiftUI
 
 struct QuestionCard: View {
@@ -11,14 +10,21 @@ struct QuestionCard: View {
     var showsQuestion = true
     var width: CGFloat = 300
     var height: CGFloat = 464
+    var imageContext: TopicImageContext = .questionCard
 
     var body: some View {
-        ZStack(alignment: .topLeading) {
+        ZStack(alignment: .leading) {
             Color.topicColor(for: topicID)
+
+            Image(topicID: topicID, context: imageContext)
+                .resizable()
+                .scaledToFill()
+                .frame(width: width, height: height)
+                .clipped()
 
             if showsQuestion {
                 Text(question)
-                    .font(AppFont.title3Regular)
+                    .font(AppFont.title3Bold)
                     .foregroundStyle(Color.textPrimary)
                     .multilineTextAlignment(.leading)
                     .padding(Spacing.lg)
@@ -42,7 +48,6 @@ struct QuestionCard: View {
         question: "Jika kamu harus memperkenalkan dirimu tanpa menyebut pekerjaan, jurusan, atau hobi, apa yang akan kamu katakan?",
         topicID: 1
     )
-//    .frame(width: 300, height: 475)
     .padding(Spacing.lg)
     .background(Color.bgPrimary)
 }

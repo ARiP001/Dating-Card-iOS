@@ -72,7 +72,7 @@ extension Color {
     static let textSecondary = Color(hex: "#8E8E93")
     static let border = Color(hex: "#3B2C33").opacity(0.2)
     
-    // MARK: Brand#imageLiteral(resourceName: "Screenshot 2026-08-11 at 22.46.22.png")
+    // MARK: Brand
     static let brandPrimaryRosePink = Color(hex: "#D45F96")
     
     // MARK: Button

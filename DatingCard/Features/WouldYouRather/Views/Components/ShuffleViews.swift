@@ -120,7 +120,8 @@ struct SingleShuffleCard: View {
             topicID: topicID,
             showsQuestion: false,
             width: 132,
-            height: 186
+            height: 186,
+            imageContext: .questionCard
         )
             .shadow(color: .black.opacity(0.14), radius: 12, x: 0, y: 8)
     }
@@ -137,7 +138,8 @@ struct MiniSpinningCard: View {
                 topicID: card.topicID ?? 1,
                 showsQuestion: false,
                 width: 78,
-                height: 110
+                height: 110,
+                imageContext: .wouldYouRather
             )
 
             if isSelected {
