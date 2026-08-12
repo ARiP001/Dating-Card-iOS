@@ -11,7 +11,7 @@ import SwiftData
 
 @MainActor
 final class GameplayViewModel: ObservableObject {
-    enum State { case loading, playing, packFinished, sessionFinished, unavailable }
+    enum State { case loading, playing, packFinished, sessionFinished, loadFailed }
 
     @Published private(set) var state: State = .loading
     @Published private(set) var cards: [CardModel] = []
@@ -30,17 +30,30 @@ final class GameplayViewModel: ObservableObject {
 
     func prepare(in context: ModelContext) {
         guard state == .loading else { return }
+
         do {
+            // Hanya kartu yang belum pernah dimainkan yang ditawarkan.
             let descriptor = FetchDescriptor<CardModel>(
-                predicate: #Predicate { $0.topicID == topicID },
+                predicate: #Predicate { $0.topicID == topicID && !$0.isPicked },
                 sortBy: [SortDescriptor(\CardModel.question)]
             )
-            cards = Array(try context.fetch(descriptor).prefix(5))
-            currentIndex = min(max(session.lastIndex ?? 0, 0), max(cards.count - 1, 0))
-            state = cards.count == 5 ? .playing : .unavailable
+
+            let fetchedCards = try context.fetch(descriptor)
+
+            // Maksimal 5 kartu per sesi pack, tapi tersedia 1-5 kartu pun
+            // tetap dianggap valid untuk dimainkan (bukan cuma tepat 5).
+            cards = Array(fetchedCards.prefix(5))
+
+            currentIndex = min(
+                max(session.lastIndex ?? 0, 0),
+                max(cards.count - 1, 0)
+            )
+
+            state = cards.isEmpty ? .loadFailed : .playing
+
         } catch {
-            state = .unavailable
-            print("Failed to load gameplay cards: \(error)")
+            state = .loadFailed
+            print("Failed to load gameplay cards:", error)
         }
     }
 

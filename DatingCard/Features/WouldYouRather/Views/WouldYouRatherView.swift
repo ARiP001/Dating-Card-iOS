@@ -36,7 +36,7 @@ struct WouldYouRatherView: View {
                             dampingFraction: 0.8
                         )
                     ) {
-                        viewModel.proceedFromShuffling()
+                        viewModel.proceedFromShuffling(in: modelContext)
                     }
                 }
                 .transition(.opacity)
@@ -67,7 +67,7 @@ struct WouldYouRatherView: View {
                     cards: viewModel.pickedPackCards,
                     selectedCardID: $viewModel.selectedCardID,
                     onConfirm: {
-                        viewModel.startSelectedTopic()
+                        viewModel.startSelectedTopic(in: modelContext)
                     },
                     onDismiss: {
                         dismiss()
@@ -89,9 +89,13 @@ struct WouldYouRatherView: View {
                     .zIndex(3)
                 }
 
+            case let .topicExhausted(topicName):
+                topicExhaustedContent(topicName: topicName)
+                    .zIndex(4)
+
             case .empty:
                 emptyContent
-                    .zIndex(4)
+                    .zIndex(5)
             }
         }
         .animation(
@@ -108,7 +112,19 @@ struct WouldYouRatherView: View {
     private var emptyContent: some View {
         AppEmptyState(
             title: "Belum ada topik yang cocok",
-            message: "Preferensi kalian belum memiliki topik yang sama. Coba mulai sesi baru dan pilih topik yang bisa kalian sepakati bersama.",
+            message: "Topik yang kalian pilih belum memiliki preferensi yang sama. Cobalah mulai sesi baru dan pilih topik yang bisa kalian sepakati bersama.",
+            actionTitle: "Kembali ke Home"
+        ) {
+            dismiss()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.bgPrimary.ignoresSafeArea())
+    }
+
+    private func topicExhaustedContent(topicName: String) -> some View {
+        AppEmptyState(
+            title: "Kartu untuk topik ini sudah habis",
+            message: "Selamat, kamu sudah memahami \(topicName) dengan baik sejauh ini. Yuk pilih topik lain untuk terus mengenal satu sama lain.",
             actionTitle: "Kembali ke Home"
         ) {
             dismiss()
@@ -645,79 +661,4 @@ private extension Array {
             ? self[index]
             : nil
     }
-}
-
-// MARK: - Previews
-#Preview("Would You Rather - Full Flow") {
-    let container = try! ModelContainer(
-        for: CardModel.self,
-        SessionModel.self,
-        configurations: ModelConfiguration(
-            isStoredInMemoryOnly: true
-        )
-    )
-
-    let context = container.mainContext
-
-    // Simulate 5 topics selected by the user.
-    let selectedTopicIDs = Array(
-        Topics.all
-            .shuffled()
-            .prefix(10)
-            .map(\.id)
-    )
-
-    // One dummy card for each selected topic.
-    for topicID in selectedTopicIDs {
-        let card = CardModel(
-            topicID: topicID,
-            question: "Dummy question for topic \(topicID)"
-        )
-
-        context.insert(card)
-    }
-
-    return WouldYouRatherView(
-        topicIDs: selectedTopicIDs
-    )
-    .modelContainer(container)
-}
-#Preview("Bahas yang mana dulu?") {
-    @Previewable @State var selectedCardID: UUID?
-
-    let container = try! ModelContainer(
-        for: CardModel.self,
-        SessionModel.self,
-        configurations: ModelConfiguration(
-            isStoredInMemoryOnly: true
-        )
-    )
-
-    let context = container.mainContext
-
-    let randomTopicIDs = Array(
-        Topics.all
-            .shuffled()
-            .prefix(2)
-            .map(\.id)
-    )
-
-    let cards = randomTopicIDs.map { topicID in
-        CardModel(
-            topicID: topicID,
-            question: "Dummy question for topic \(topicID)"
-        )
-    }
-
-    cards.forEach {
-        context.insert($0)
-    }
-
-    return WouldYouRatherSelectionView(
-        cards: cards,
-        selectedCardID: $selectedCardID,
-        onConfirm: {},
-        onDismiss: {}
-    )
-    .modelContainer(container)
 }

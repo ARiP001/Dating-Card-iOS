@@ -30,7 +30,7 @@ struct GameplayView: View {
             case .playing: playingContent
             case .packFinished: endState(title: "Sedikit demi sedikit,\nkalian mulai saling mengenal", message: "Masih ada topik obrolan lain yang menunggu untuk kalian temukan. Yuk, lanjutkan obrolan kalian.", button: "Buka topik selanjutnya", action: onOpenAnotherPack)
             case .sessionFinished: endState(title: "Topik pilihan kalian\nsudah habis dimainkan", message: "Kalau masih ingin mengenalnya lebih jauh, yuk mulai lagi dan temukan sisi lain dari satu sama lain.", button: "Halaman utama", action: { requestedMainTab = "history"; dismiss() })
-            case .unavailable: unavailableContent
+            case .loadFailed: loadFailedContent
             }
         }
         .task { viewModel.prepare(in: modelContext) }
@@ -67,10 +67,14 @@ struct GameplayView: View {
         }.padding(.horizontal, Spacing.xl).padding(.vertical, Spacing.md)
     }
 
-    private var unavailableContent: some View {
+    // Fallback murni untuk error teknis (mis. fetch SwiftData gagal).
+    // Kasus "kartu topik habis" sudah ditangani lebih awal di
+    // WouldYouRatherView (.topicExhausted), jadi GameplayView seharusnya
+    // tidak pernah dibuka lagi untuk topik yang kartunya sudah habis.
+    private var loadFailedContent: some View {
         VStack(spacing: Spacing.md) {
-            Text("Kartu untuk topik ini belum lengkap").font(AppFont.title3Bold)
-            Text("Topik membutuhkan 5 kartu pertanyaan sebelum dapat dimainkan.").font(AppFont.bodyRegular).foregroundStyle(Color.textSecondary).multilineTextAlignment(.center)
+            Text("Gagal memuat kartu").font(AppFont.title3Bold)
+            Text("Terjadi kendala saat memuat pertanyaan untuk topik ini. Coba lagi sebentar lagi.").font(AppFont.bodyRegular).foregroundStyle(Color.textSecondary).multilineTextAlignment(.center)
             AppButton(title: "Kembali") { dismiss() }
         }.padding(Spacing.xl)
     }
