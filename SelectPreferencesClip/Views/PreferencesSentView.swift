@@ -8,10 +8,34 @@
 import SwiftUI
 
 struct PreferencesSentView: View {
+    private enum SendAnimationState {
+        case envelopeOpen
+        case envelopeClosed
+        case paperPlane
+
+        var symbolName: String {
+            switch self {
+            case .envelopeOpen:
+                return "envelope.open.fill"
+
+            case .envelopeClosed:
+                return "envelope.fill"
+
+            case .paperPlane:
+                return "paperplane.fill"
+            }
+        }
+    }
+
     @State private var isShowingSentContent = false
-    @State private var checkmarkOpacity = 0.0
-    @State private var checkmarkScale = 0.45
-    @State private var checkmarkRotation = -12.0
+
+    @State private var sendAnimationState: SendAnimationState = .envelopeOpen
+
+    @State private var symbolOpacity = 0.0
+    @State private var symbolScale = 0.7
+
+    @State private var planeOffset: CGSize = .zero
+    @State private var planeRotation = 0.0
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -36,20 +60,17 @@ struct PreferencesSentView: View {
                         )
                     )
             } else {
-                animatedCheckmark
-                    .opacity(checkmarkOpacity)
-                    .scaleEffect(checkmarkScale)
-                    .rotationEffect(.degrees(checkmarkRotation))
+                sendAnimation
             }
         }
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
         .task {
-            await playConfirmationAnimation()
+            await playSendAnimation()
         }
     }
 
-    private var animatedCheckmark: some View {
+    private var sendAnimation: some View {
         ZStack {
             Circle()
                 .fill(Color.brandPrimaryRosePink)
@@ -60,12 +81,19 @@ struct PreferencesSentView: View {
                     y: 10
                 )
 
-            Image(systemName: "checkmark")
-                .font(.system(size: 50, weight: .bold))
+            Image(systemName: sendAnimationState.symbolName)
+                .font(.system(size: 48, weight: .semibold))
                 .foregroundStyle(Color.bgCard)
+                .contentTransition(
+                    .symbolEffect(.replace)
+                )
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .accessibilityLabel("Preferensi berhasil dikirim")
+        .opacity(symbolOpacity)
+        .scaleEffect(symbolScale)
+        .offset(planeOffset)
+        .rotationEffect(.degrees(planeRotation))
+        .accessibilityLabel("Preferensi sedang dikirim")
     }
 
     private var sentContent: some View {
@@ -123,26 +151,51 @@ struct PreferencesSentView: View {
         .accessibilityHidden(true)
     }
 
-    private func playConfirmationAnimation() async {
+    private func playSendAnimation() async {
+        // 1. Envelope open appears
         withAnimation(
-            .spring(response: 0.5, dampingFraction: 0.68)
+            .spring(response: 0.45, dampingFraction: 0.72)
         ) {
-            checkmarkOpacity = 1
-            checkmarkScale = 1
-            checkmarkRotation = 0
+            symbolOpacity = 1
+            symbolScale = 1
         }
 
-        try? await Task.sleep(nanoseconds: 1_150_000_000)
+        try? await Task.sleep(nanoseconds: 650_000_000)
         guard !Task.isCancelled else { return }
 
-        withAnimation(.easeIn(duration: 0.28)) {
-            checkmarkOpacity = 0
-            checkmarkScale = 1.12
+        // 2. Envelope closes
+        withAnimation(.easeInOut(duration: 0.35)) {
+            sendAnimationState = .envelopeClosed
         }
 
-        try? await Task.sleep(nanoseconds: 300_000_000)
+        try? await Task.sleep(nanoseconds: 500_000_000)
         guard !Task.isCancelled else { return }
 
+        // 3. Envelope becomes paper plane
+        withAnimation(.easeInOut(duration: 0.35)) {
+            sendAnimationState = .paperPlane
+            symbolScale = 0.92
+        }
+
+        try? await Task.sleep(nanoseconds: 350_000_000)
+        guard !Task.isCancelled else { return }
+
+        // 4. Paper plane flies away
+        withAnimation(.easeIn(duration: 0.55)) {
+            planeOffset = CGSize(
+                width: 180,
+                height: -180
+            )
+
+            planeRotation = 10
+            symbolScale = 0.55
+            symbolOpacity = 0
+        }
+
+        try? await Task.sleep(nanoseconds: 550_000_000)
+        guard !Task.isCancelled else { return }
+
+        // 5. Show success content
         withAnimation(.easeOut(duration: 0.45)) {
             isShowingSentContent = true
         }

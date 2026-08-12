@@ -10,6 +10,8 @@ struct QRView: View {
     private enum FlowStep: Equatable {
         case preferences
         case waitingForPartner
+        case preferencesReceived
+        case wouldYouRather
     }
 
     @StateObject private var viewModel = FullAppViewModel()
@@ -25,9 +27,15 @@ struct QRView: View {
 
     var body: some View {
         Group {
-            if shouldShowCompletedContent {
+            if flowStep == .wouldYouRather {
                 completedContent
                     .transition(.opacity)
+
+            } else if flowStep == .preferencesReceived {
+                PreferencesReceivedView(
+                    onAnimationCompleted: showWouldYouRather
+                )
+                .transition(.opacity)
 
             } else if partnerHasJoined {
                 preferencesContent
@@ -44,7 +52,7 @@ struct QRView: View {
         )
         .animation(
             .easeInOut(duration: 0.25),
-            value: shouldShowCompletedContent
+            value: flowStep
         )
         .background(
             Color.bgPrimary
@@ -88,6 +96,7 @@ struct QRView: View {
         }
 
         .onChange(of: viewModel.state) {
+            showReceiveAnimationIfReady()
             printCombinedPreferencesIfNeeded()
         }
 
@@ -119,12 +128,12 @@ struct QRView: View {
     }
 
     private var hostHasCompletedPreferences: Bool {
-        flowStep == .waitingForPartner
-    }
-
-    private var shouldShowCompletedContent: Bool {
-        viewModel.state == .completed
-        && hostHasCompletedPreferences
+        switch flowStep {
+        case .waitingForPartner, .preferencesReceived, .wouldYouRather:
+            return true
+        case .preferences:
+            return false
+        }
     }
 
     // MARK: - Preferences
@@ -149,6 +158,9 @@ struct QRView: View {
                 message:
                     "Menunggu\nperangkat lain\nmenyelesaikan\npilihannya..."
             )
+
+        case .preferencesReceived, .wouldYouRather:
+            EmptyView()
         }
     }
 
@@ -338,6 +350,28 @@ struct QRView: View {
     private func showWaitingState() {
         isShowingHatedTopics = false
         flowStep = .waitingForPartner
+        showReceiveAnimationIfReady()
+    }
+
+    private func showReceiveAnimationIfReady() {
+        guard
+            viewModel.state == .completed,
+            flowStep == .waitingForPartner
+        else {
+            return
+        }
+
+        flowStep = .preferencesReceived
+    }
+
+    private func showWouldYouRather() {
+        guard flowStep == .preferencesReceived else {
+            return
+        }
+
+        withAnimation(.easeInOut(duration: 0.25)) {
+            flowStep = .wouldYouRather
+        }
     }
 
     // MARK: - Combined Preferences

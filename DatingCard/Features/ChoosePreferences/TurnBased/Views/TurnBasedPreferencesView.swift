@@ -85,6 +85,7 @@ struct TurnBasedPreferencesView: View {
                 hatedTopicIDs: currentHatedTopicIDs,
                 onSubmit: finishCurrentTurn
             )
+            .id(turn)
         }
     }
 
@@ -97,6 +98,7 @@ struct TurnBasedPreferencesView: View {
                 accentColor: turn.accentColor,
                 onContinue: showHatedTopics
             )
+            .id(turn)
             .navigationBarBackButtonHidden(turn == .partner)
 
         case .wouldYouRather:

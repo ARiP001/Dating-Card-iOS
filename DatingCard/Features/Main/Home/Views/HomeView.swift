@@ -5,6 +5,7 @@
 //  Created by Arif Fathurrahman on 11/08/26.
 //
 
+import SwiftData
 import SwiftUI
 
 struct HomeView: View {
@@ -13,10 +14,21 @@ struct HomeView: View {
         case individual
     }
 
+    @Query(
+        filter: #Predicate<SessionModel> { session in
+            session.isContinue == true
+        },
+        sort: \SessionModel.createdAt,
+        order: .reverse
+    ) private var unfinishedSessions: [SessionModel]
+
     @State private var isShowingTopicSelection = false
+    @State private var isShowingPreviousSessionAlert = false
     @State private var pendingRoute: PendingRoute?
     @State private var isShowingAlternatingFlow = false
     @State private var isShowingIndividualFlow = false
+    @State private var sessionToResume: SessionModel?
+    @State private var isResumingSession = false
     @State private var isPulsing = false
 
     var body: some View {
@@ -47,6 +59,12 @@ struct HomeView: View {
                         x: geometry.size.width / 2,
                         y: geometry.size.height * 0.60
                     )
+
+                    if isShowingPreviousSessionAlert {
+                        previousSessionAlert
+                            .transition(.opacity)
+                            .zIndex(1)
+                    }
                 }
             }
             .ignoresSafeArea(.container, edges: .bottom)
@@ -58,6 +76,12 @@ struct HomeView: View {
             .navigationDestination(isPresented: $isShowingIndividualFlow) {
                 QRView()
                     .toolbar(.hidden, for: .tabBar)
+            }
+            .navigationDestination(isPresented: $isResumingSession) {
+                if let sessionToResume {
+                    WouldYouRatherView(session: sessionToResume)
+                        .toolbar(.hidden, for: .tabBar)
+                }
             }
             .sheet(
                 isPresented: $isShowingTopicSelection,
@@ -77,6 +101,44 @@ struct HomeView: View {
 //                .presentationBackground(Color.bgPrimary)
             }
         }
+    }
+
+    private var previousSessionAlert: some View {
+        SessionExitConfirmation(
+            title: "Permainan Terakhir",
+            message: "Apakah kamu ingin melanjutkan permainan sebelumnya?\n\nJika tidak, kamu dapat melanjutkannya melalui riwayat permainan.",
+            continueTitle: "Lanjutkan bermain",
+            exitTitle: "Tidak",
+            exitBackgroundColor: Color.bgPrimary,
+            onContinue: resumeLatestSession,
+            onExit: startNewSession
+        )
+    }
+
+    private func handleStartButton() {
+        if unfinishedSessions.isEmpty {
+            isShowingTopicSelection = true
+        } else {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                isShowingPreviousSessionAlert = true
+            }
+        }
+    }
+
+    private func resumeLatestSession() {
+        guard let latestSession = unfinishedSessions.first else {
+            startNewSession()
+            return
+        }
+
+        sessionToResume = latestSession
+        isShowingPreviousSessionAlert = false
+        isResumingSession = true
+    }
+
+    private func startNewSession() {
+        isShowingPreviousSessionAlert = false
+        isShowingTopicSelection = true
     }
 
     private func presentPendingRoute() {
@@ -136,7 +198,7 @@ struct HomeView: View {
             }
 
             Button {
-                isShowingTopicSelection = true
+                handleStartButton()
             } label: {
                 Text("Mulai\nBermain")
                     .font(AppFont.title1Bold)
