@@ -36,7 +36,7 @@ struct AppConfirmationAlert: View {
         VStack(alignment: .leading, spacing: Spacing.md) {
             VStack(alignment: .leading, spacing: Spacing.sm) {
                 Text(title)
-                    .font(AppFont.subHead)
+                    .font(AppFont.bodyBold)
                     .foregroundStyle(Color.textPrimary)
 
                 Text(message)

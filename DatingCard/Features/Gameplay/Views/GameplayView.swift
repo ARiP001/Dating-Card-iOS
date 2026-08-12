@@ -17,6 +17,7 @@ struct GameplayView: View {
     @State private var showsExitConfirmation = false
     @State private var packFinishedContent = EndStatePool.packFinished.randomElement()!
     @State private var sessionFinishedContent = EndStatePool.sessionFinished.randomElement()!
+    @AppStorage private var hasCompletedGameplayTutorial: Bool
     @AppStorage("requestedMainTab")
     private var requestedMainTab = "home"
 
@@ -33,6 +34,11 @@ struct GameplayView: View {
         topicID: Int,
         onOpenAnotherPack: @escaping () -> Void
     ) {
+        _hasCompletedGameplayTutorial = AppStorage(
+            wrappedValue: false,
+            "hasCompletedGameplayTutorial.\(session.id.uuidString)"
+        )
+
         _viewModel = StateObject(
             wrappedValue: GameplayViewModel(
                 session: session,
@@ -52,6 +58,11 @@ struct GameplayView: View {
     #if DEBUG
     init(previewState: GameplayViewModel.State) {
         let session = SessionModel()
+
+        _hasCompletedGameplayTutorial = AppStorage(
+            wrappedValue: false,
+            "hasCompletedGameplayTutorial.preview.\(session.id.uuidString)"
+        )
 
         _viewModel = StateObject(
             wrappedValue: GameplayViewModel(
@@ -103,6 +114,20 @@ struct GameplayView: View {
             case .loadFailed:
                 loadFailedContent
             }
+
+            if shouldShowTutorial,
+               let currentCard = viewModel.currentCard {
+                TutorialView(
+                    topicID: currentCard.topicID,
+                    onCompleted: {
+                        withAnimation(.easeOut(duration: 0.25)) {
+                            hasCompletedGameplayTutorial = true
+                        }
+                    }
+                )
+                .transition(.opacity)
+                .zIndex(2)
+            }
         }
         .task {
             #if DEBUG
@@ -135,6 +160,19 @@ struct GameplayView: View {
                     }
                 )
             }
+        }
+    }
+
+    private var shouldShowTutorial: Bool {
+        guard !hasCompletedGameplayTutorial else {
+            return false
+        }
+
+        switch viewModel.state {
+        case .playing:
+            return true
+        default:
+            return false
         }
     }
 
@@ -228,6 +266,7 @@ struct GameplayView: View {
         }
         .padding(.horizontal, Spacing.xl)
         .padding(.vertical, Spacing.sm)
+        .allowsHitTesting(!shouldShowTutorial)
     }
 
     // MARK: - Swipe Instructions

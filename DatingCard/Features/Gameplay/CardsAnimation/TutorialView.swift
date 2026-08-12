@@ -1,225 +1,323 @@
 import SwiftUI
 
 struct TutorialView: View {
-    let onStart: () -> Void
+    let topicID: Int
+    let onCompleted: () -> Void
 
     @State private var step: TutorialStep = .swipeRight
-    @State private var demoOffset: CGSize = .zero
-    @State private var demoRotation: Double = 0
+    @State private var cardOffset: CGSize = .zero
+    @State private var cardRotation = 0.0
+    @State private var isCompletingStep = false
     @State private var isUserDragging = false
-    @State private var loopTask: Task<Void, Never>?
+    @State private var motionCueTask: Task<Void, Never>?
 
     private let swipeThreshold: CGFloat = 110
 
     var body: some View {
-        VStack(spacing: 20) {
-            Text(step == .swipeRight ? "Try Answered" : "Try Skipped")
-                .font(.title.bold())
+        GeometryReader { geometry in
+            ZStack {
+                Color.textPrimary.opacity(0.80)
+                    .ignoresSafeArea()
 
-            GeometryReader { geometry in
-                let screenWidth = geometry.size.width
-                let cardWidth = screenWidth
-                let demoDistance = screenWidth * 0.42
+                VStack(spacing: Spacing.lg) {
+                    instructionHeader
 
-                ZStack {
                     ZStack {
-                        TutorialDemoCard()
-                            .frame(width: cardWidth, height: 500)
-                            .offset(demoOffset)
-                            .rotationEffect(.degrees(demoRotation))
-                            .gesture(
-                                DragGesture()
-                                    .onChanged { value in
-                                        loopTask?.cancel()
-                                        isUserDragging = true
-                                        demoOffset = value.translation
-                                        demoRotation = Double(value.translation.width / 18)
-                                    }
-                                    .onEnded { value in
-                                        handleTutorialSwipe(value.translation, demoDistance: demoDistance)
-                                    }
-                            )
-                            .animation(.spring(response: 0.65, dampingFraction: 0.86), value: demoOffset)
-                            .animation(.spring(response: 0.65, dampingFraction: 0.86), value: demoRotation)
-                    }
-                    .frame(width: screenWidth * 2.4, height: 560)
-                    .position(x: screenWidth / 2, y: 280)
-                    .zIndex(1)
-
-                    HStack {
-                        TutorialHint(
-                            title: "Answered",
-                            subtitle: "Swipe right",
-                            symbol: "arrow.right",
-                            color: .black,
-                            opacity: step == .swipeRight ? 1 : 0
+                        tutorialCard(
+                            topicID: topicID,
+                            width: min(320, geometry.size.width - 64),
+                            height: min(475, geometry.size.height * 0.58)
+                        )
+                        .offset(cardOffset)
+                        .rotationEffect(.degrees(cardRotation))
+                        .gesture(tutorialDrag)
+                        .animation(
+                            .spring(
+                                response: 0.34,
+                                dampingFraction: 0.82
+                            ),
+                            value: cardOffset
+                        )
+                        .animation(
+                            .spring(
+                                response: 0.34,
+                                dampingFraction: 0.82
+                            ),
+                            value: cardRotation
                         )
 
-                        Spacer()
-
-                        TutorialHint(
-                            title: "Skipped",
-                            subtitle: "Swipe left",
-                            symbol: "arrow.left",
-                            color: .black,
-                            opacity: step == .swipeLeft ? 1 : 0
-                        )
+                        edgeActionIndicators
+                            .allowsHitTesting(false)
                     }
-                    .padding(.horizontal, 18)
-                    .frame(width: screenWidth)
-                    .position(x: screenWidth / 2, y: 280)
-                    .zIndex(2)
+                    .frame(maxHeight: .infinity)
+                    .offset(y: -20)
+
+                    swipeDirectionCue
+
+                    instructionCopy
+                        .padding(.horizontal, Spacing.xl)
                 }
-                .onAppear {
-                    startLoopingTutorialAnimation(distance: demoDistance)
-                }
-                .onChange(of: step) { _, _ in
-                    startLoopingTutorialAnimation(distance: demoDistance)
-                }
+                .padding(.top, Spacing.lg)
+                .padding(.bottom, Spacing.xl)
             }
-            .frame(height: 560)
-
-            Text(step == .swipeRight ? "Swipe the card right to mark it answered." : "Now swipe the card left to skip it.")
-                .font(.headline)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-
-            Spacer(minLength: 20)
         }
-        .padding(.horizontal, 24)
-        .padding(.top, 24)
+        .accessibilityElement(children: .contain)
+        .onAppear {
+            startMotionCue()
+        }
+        .onChange(of: step) {
+            startMotionCue()
+        }
         .onDisappear {
-            loopTask?.cancel()
+            motionCueTask?.cancel()
         }
     }
 
-    private func startLoopingTutorialAnimation(distance: CGFloat) {
-        loopTask?.cancel()
+    private var instructionHeader: some View {
+        VStack(spacing: Spacing.xs) {
+            Text(
+                step == .swipeRight
+                    ? "Coba geser ke kanan"
+                    : "Sekarang geser ke kiri"
+            )
+            .font(AppFont.title2Bold)
+            .foregroundStyle(Color.bgCard)
+
+            Text(step == .swipeRight ? "Simpan" : "Lewati")
+                .font(AppFont.headlineSemibold)
+                .foregroundStyle(activeColor)
+        }
+    }
+
+    private var swipeDirectionCue: some View {
+        HStack(spacing: Spacing.sm) {
+            if step == .swipeLeft {
+                directionArrow(systemName: "arrow.left")
+            }
+
+            Image(
+                systemName: "hand.point.up.left.fill"
+            )
+            .font(.system(size: 36, weight: .semibold))
+
+            if step == .swipeRight {
+                directionArrow(systemName: "arrow.right")
+            }
+        }
+        .foregroundStyle(Color.bgCard)
+        .symbolEffect(.pulse.byLayer, options: .repeating)
+        .transition(.scale.combined(with: .opacity))
+        .animation(.easeInOut(duration: 0.24), value: step)
+        .offset(y: -12)
+    }
+
+    private func directionArrow(systemName: String) -> some View {
+        Image(systemName: systemName)
+            .resizable()
+            .aspectRatio(contentMode: .fill)
+            .frame(width: 62, height: 24)
+            .clipped()
+    }
+
+    private var edgeActionIndicators: some View {
+        HStack {
+            if step == .swipeLeft {
+                actionIndicator(
+                    systemName: "xmark",
+                    color: .buttonPrimaryRed
+                )
+                .offset(x: -22)
+                .transition(
+                    .scale(scale: 0.7)
+                    .combined(with: .opacity)
+                )
+            }
+
+            Spacer()
+
+            if step == .swipeRight {
+                actionIndicator(
+                    systemName: "checkmark",
+                    color: .accentPrimary
+                )
+                .offset(x: 22)
+                .transition(
+                    .scale(scale: 0.7)
+                    .combined(with: .opacity)
+                )
+            }
+        }
+        .padding(.horizontal, Spacing.sm)
+        .animation(.easeInOut(duration: 0.24), value: step)
+    }
+
+    private func actionIndicator(
+        systemName: String,
+        color: Color
+    ) -> some View {
+        Image(systemName: systemName)
+            .font(.title.bold())
+            .foregroundStyle(Color.bgCard)
+            .frame(width: 76, height: 76)
+            .background(color)
+            .clipShape(Circle())
+            .overlay {
+                Circle()
+                    .stroke(Color.bgCard, lineWidth: 2)
+            }
+    }
+
+    private func tutorialCard(
+        topicID: Int,
+        width: CGFloat,
+        height: CGFloat
+    ) -> some View {
+        RoundedRectangle(
+            cornerRadius: Radius.lg,
+            style: .continuous
+        )
+        .fill(Color.topicColor(for: topicID))
+        .frame(width: width, height: height)
+        .overlay {
+            Text("Kartu Pertanyaan")
+                .font(AppFont.title1Bold)
+                .foregroundStyle(Color.textPrimary)
+                .multilineTextAlignment(.center)
+                .padding(Spacing.xl)
+        }
+        .shadow(
+            color: Color.textPrimary.opacity(0.22),
+            radius: 14,
+            y: 8
+        )
+    }
+
+    private var instructionCopy: some View {
+        VStack(spacing: Spacing.xs) {
+            Text(
+                step == .swipeRight
+                    ? "Swipe ke kanan kalau sudah selesai dibahas"
+                    : "Swipe ke kiri kalau ingin melewati kartu"
+            )
+            .font(AppFont.headlineSemibold)
+            .foregroundStyle(Color.bgCard)
+
+            Text(
+                step == .swipeRight
+                    ? "Kartu ini dapat dilihat di riwayat dan tidak akan muncul lagi"
+                    : "Kartu ini tidak akan disimpan dan tidak akan muncul lagi"
+            )
+            .font(AppFont.bodyRegular)
+            .foregroundStyle(Color.bgCard.opacity(0.82))
+        }
+        .multilineTextAlignment(.center)
+        .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private var activeColor: Color {
+        step == .swipeRight
+            ? .accentDustyMauve
+            : .buttonPrimaryRed
+    }
+
+    private var tutorialDrag: some Gesture {
+        DragGesture()
+            .onChanged { value in
+                guard !isCompletingStep else { return }
+                motionCueTask?.cancel()
+                isUserDragging = true
+                cardOffset = value.translation
+                cardRotation = Double(value.translation.width / 18)
+            }
+            .onEnded { value in
+                finishDrag(value.translation)
+            }
+    }
+
+    private func finishDrag(_ translation: CGSize) {
+        guard !isCompletingStep else { return }
         isUserDragging = false
 
-        loopTask = Task {
+        let completedExpectedSwipe =
+            (step == .swipeRight && translation.width > swipeThreshold)
+            || (step == .swipeLeft && translation.width < -swipeThreshold)
+
+        guard completedExpectedSwipe else {
+            cardOffset = .zero
+            cardRotation = 0
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                startMotionCue()
+            }
+            return
+        }
+
+        motionCueTask?.cancel()
+        isCompletingStep = true
+
+        withAnimation(.easeIn(duration: 0.28)) {
+            cardOffset = CGSize(
+                width: step == .swipeRight ? 700 : -700,
+                height: 60
+            )
+            cardRotation = step == .swipeRight ? 20 : -20
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            if step == .swipeRight {
+                step = .swipeLeft
+                cardOffset = .zero
+                cardRotation = 0
+                isCompletingStep = false
+            } else {
+                onCompleted()
+            }
+        }
+    }
+
+    private func startMotionCue() {
+        motionCueTask?.cancel()
+        isUserDragging = false
+
+        let direction: CGFloat = step == .swipeRight ? 1 : -1
+
+        motionCueTask = Task { @MainActor in
             while !Task.isCancelled {
-                await resetDemo()
-                try? await Task.sleep(nanoseconds: 500_000_000)
+                try? await Task.sleep(nanoseconds: 650_000_000)
+                guard !Task.isCancelled, !isUserDragging else { return }
 
-                await animateDemo(directionForCurrentStep, distance: distance)
-                try? await Task.sleep(nanoseconds: 900_000_000)
+                withAnimation(
+                    .easeInOut(duration: 0.55)
+                ) {
+                    cardOffset = CGSize(
+                        width: direction * 96,
+                        height: 8
+                    )
+                    cardRotation = Double(direction * 8)
+                }
 
-                await resetDemo()
+                try? await Task.sleep(nanoseconds: 650_000_000)
+                guard !Task.isCancelled, !isUserDragging else { return }
+
+                withAnimation(
+                    .spring(
+                        response: 0.48,
+                        dampingFraction: 0.82
+                    )
+                ) {
+                    cardOffset = .zero
+                    cardRotation = 0
+                }
+
                 try? await Task.sleep(nanoseconds: 700_000_000)
             }
         }
     }
-
-    private var directionForCurrentStep: SwipeDirection {
-        step == .swipeRight ? .right : .left
-    }
-
-    @MainActor
-    private func animateDemo(_ direction: SwipeDirection, distance: CGFloat) async {
-        guard !isUserDragging else { return }
-
-        withAnimation(.spring(response: 0.8, dampingFraction: 0.9)) {
-            demoOffset = CGSize(width: direction == .right ? distance : -distance, height: 20)
-            demoRotation = direction == .right ? 14 : -14
-        }
-    }
-
-    @MainActor
-    private func resetDemo() async {
-        guard !isUserDragging else { return }
-
-        withAnimation(.spring(response: 0.7, dampingFraction: 0.9)) {
-            demoOffset = .zero
-            demoRotation = 0
-        }
-    }
-
-    private func handleTutorialSwipe(_ translation: CGSize, demoDistance: CGFloat) {
-        isUserDragging = false
-
-        let swipedRight = translation.width > swipeThreshold
-        let swipedLeft = translation.width < -swipeThreshold
-
-        if step == .swipeRight && swipedRight {
-            completeCurrentTutorialSwipe(.right)
-        } else if step == .swipeLeft && swipedLeft {
-            completeCurrentTutorialSwipe(.left)
-        } else {
-            withAnimation(.spring(response: 0.55, dampingFraction: 0.85)) {
-                demoOffset = .zero
-                demoRotation = 0
-            }
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                startLoopingTutorialAnimation(distance: demoDistance)
-            }
-        }
-    }
-
-    private func completeCurrentTutorialSwipe(_ direction: SwipeDirection) {
-        loopTask?.cancel()
-
-        withAnimation(.spring(response: 0.45, dampingFraction: 0.82)) {
-            demoOffset = CGSize(width: direction == .right ? 900 : -900, height: 90)
-            demoRotation = direction == .right ? 22 : -22
-        }
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-            if step == .swipeRight {
-                withAnimation(.spring(response: 0.5, dampingFraction: 0.85)) {
-                    step = .swipeLeft
-                    demoOffset = .zero
-                    demoRotation = 0
-                }
-            } else {
-                onStart()
-            }
-        }
-    }
 }
 
-struct TutorialDemoCard: View {
-    var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 24)
-                .fill(.blue)
-
-            Text("This is a Conversation Card")
-                .font(.title.bold())
-                .multilineTextAlignment(.center)
-                .foregroundStyle(.white)
-                .padding(32)
-        }
-        .shadow(color: .black.opacity(0.18), radius: 16, x: 0, y: 10)
-    }
-}
-
-struct TutorialHint: View {
-    let title: String
-    let subtitle: String
-    let symbol: String
-    let color: Color
-    let opacity: Double
-
-    var body: some View {
-        VStack(spacing: 8) {
-            Image(systemName: symbol)
-                .font(.title2.bold())
-
-            Text(title)
-                .font(.headline.bold())
-
-            Text(subtitle)
-                .font(.caption)
-        }
-        .foregroundStyle(color)
-        .padding(14)
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 14))
-        .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
-        .opacity(opacity)
-        .animation(.easeInOut(duration: 0.3), value: opacity)
-    }
+#Preview {
+    TutorialView(
+        topicID: 1,
+        onCompleted: { }
+    )
 }

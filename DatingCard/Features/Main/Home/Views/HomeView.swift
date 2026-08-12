@@ -22,13 +22,13 @@ struct HomeView: View {
         order: .reverse
     ) private var unfinishedSessions: [SessionModel]
 
+    @AppStorage("requestedMainTab") private var requestedMainTab = "home"
+
     @State private var isShowingTopicSelection = false
     @State private var isShowingPreviousSessionAlert = false
     @State private var pendingRoute: PendingRoute?
     @State private var isShowingAlternatingFlow = false
     @State private var isShowingIndividualFlow = false
-    @State private var sessionToResume: SessionModel?
-    @State private var isResumingSession = false
     @State private var isPulsing = false
 
     var body: some View {
@@ -72,12 +72,6 @@ struct HomeView: View {
                     QRView()
                         .toolbar(.hidden, for: .tabBar)
                 }
-                .navigationDestination(isPresented: $isResumingSession) {
-                    if let sessionToResume {
-                        WouldYouRatherView(session: sessionToResume)
-                            .toolbar(.hidden, for: .tabBar)
-                    }
-                }
                 .sheet(
                     isPresented: $isShowingTopicSelection,
                     onDismiss: presentPendingRoute
@@ -108,7 +102,7 @@ struct HomeView: View {
                     accentColor: .accentDustyMauve,
                     confirmTitle: "Lanjutkan bermain",
                     cancelTitle: "Tidak",
-                    onConfirm: resumeLatestSession,
+                    onConfirm: showHistory,
                     onCancel: startNewSession
                 )
                 .padding(.horizontal, Spacing.xl)
@@ -132,15 +126,9 @@ struct HomeView: View {
         }
     }
 
-    private func resumeLatestSession() {
-        guard let latestSession = unfinishedSessions.first else {
-            startNewSession()
-            return
-        }
-
-        sessionToResume = latestSession
+    private func showHistory() {
         isShowingPreviousSessionAlert = false
-        isResumingSession = true
+        requestedMainTab = "history"
     }
 
     private func startNewSession() {

@@ -22,6 +22,9 @@ struct MainTabView: View {
         .onChange(of: requestedMainTab) { _, value in
             selectedTab = MainTab(rawValue: value) ?? .home
         }
+        .onChange(of: selectedTab) { _, value in
+            requestedMainTab = value.rawValue
+        }
     }
 }
 

@@ -45,7 +45,7 @@ struct TurnBasedHatedChooseView: View {
                 ) {
                     header
 
-                    VStack(spacing: Spacing.md) {
+                    VStack(spacing: Spacing.sm) {
                         ForEach(Topics.groups) { group in
                             let topics = group.topics.filter {
                                 !selectedTopicIDs.contains($0.id)
@@ -68,24 +68,17 @@ struct TurnBasedHatedChooseView: View {
             }
             .scrollBounceBehavior(.basedOnSize)
         }
-        .overlay(alignment: .bottom) {
-            VStack {
-                AppButton(
-                    title: "Mulai",
-                    accentColor: accentColor,
-                    action: onSubmit
-                )
-                .padding(.horizontal, Spacing.md)
-            }
-            .padding(Spacing.md)
-            .frame(maxWidth: .infinity)
-            .glassEffect(
-                .regular,
-                in: RoundedRectangle(
-                    cornerRadius: Radius.xl
-                )
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            AppButton(
+                title: "Mulai",
+                accentColor: accentColor,
+                action: onSubmit
             )
-            .padding(.horizontal, Spacing.md)
+            .padding(.horizontal, Spacing.xl)
+            .padding(.top, Spacing.md)
+            .padding(.bottom, Spacing.sm)
+            .frame(maxWidth: .infinity)
+            .background(.ultraThinMaterial)
         }
         .onAppear(
             perform: removeSelectedTopicsFromHatedTopics

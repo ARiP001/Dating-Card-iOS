@@ -21,38 +21,42 @@ struct BigTopic: View {
                 }
             } label: {
                 HStack(spacing: Spacing.md) {
-                    VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Text(title)
-                            .font(AppFont.headlineSemibold)
-                            .foregroundStyle(Color.textPrimary)
-
-//                        Text(selectionSummary)
-//                            .font(AppFont.caption1Regular)
-//                            .foregroundStyle(Color.textSecondary)
-                    }
+                    Text(title)
+                        .font(AppFont.headlineSemibold)
+                        .foregroundStyle(Color.textPrimary)
 
                     Spacer(minLength: Spacing.md)
 
                     Image(systemName: "chevron.down")
                         .font(AppFont.headlineSemibold)
                         .foregroundStyle(accentColor)
-                        .rotationEffect(.degrees(isExpanded ? 180 : 0))
+                        .rotationEffect(
+                            .degrees(isExpanded ? 180 : 0)
+                        )
                 }
+                .frame(
+                    maxWidth: .infinity,
+                    minHeight: 76,
+                    alignment: .leading
+                )
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .padding(Spacing.md)
+            .padding(.horizontal, Spacing.md)
             .accessibilityLabel(title)
-//            .accessibilityValue(selectionSummary)
             .accessibilityHint(
-                isExpanded ? "Tutup pilihan topik" : "Buka pilihan topik"
+                isExpanded
+                    ? "Tutup pilihan topik"
+                    : "Buka pilihan topik"
             )
 
             if isExpanded {
                 Divider()
                     .padding(.horizontal, Spacing.md)
 
-                BigTopicFlowLayout(spacing: Spacing.sm) {
+                BigTopicFlowLayout(
+                    spacing: Spacing.sm
+                ) {
                     ForEach(topics) { topic in
                         TopicChip(
                             title: topic.name,
@@ -64,7 +68,12 @@ struct BigTopic: View {
                     }
                 }
                 .padding(Spacing.md)
-                .transition(.opacity.combined(with: .move(edge: .top)))
+                .transition(
+                    .opacity
+                        .combined(
+                            with: .move(edge: .top)
+                        )
+                )
             }
         }
         .background(Color.bgCard)
@@ -74,13 +83,6 @@ struct BigTopic: View {
                 style: .continuous
             )
         )
-        .overlay {
-            RoundedRectangle(
-                cornerRadius: Radius.md,
-                style: .continuous
-            )
-            .stroke(accentColor.opacity(0.45), lineWidth: 1)
-        }
     }
 
     private var selectedCount: Int {
@@ -90,12 +92,6 @@ struct BigTopic: View {
             }
         }
     }
-
-//    private var selectionSummary: String {
-//        selectedCount == 0
-//        ? "Belum ada topik dipilih"
-//        : "\(selectedCount) topik dipilih"
-//    }
 
     private func toggle(_ topicID: Int) {
         if selectedTopicIDs.contains(topicID) {
@@ -114,7 +110,9 @@ private struct BigTopicFlowLayout: Layout {
         subviews: Subviews,
         cache: inout ()
     ) -> CGSize {
-        let availableWidth = proposal.width ?? .greatestFiniteMagnitude
+        let availableWidth =
+            proposal.width ?? .greatestFiniteMagnitude
+
         var currentX: CGFloat = 0
         var currentY: CGFloat = 0
         var rowHeight: CGFloat = 0
@@ -130,9 +128,16 @@ private struct BigTopicFlowLayout: Layout {
                 rowHeight = 0
             }
 
-            contentWidth = max(contentWidth, currentX + size.width)
+            contentWidth = max(
+                contentWidth,
+                currentX + size.width
+            )
+
             currentX += size.width + spacing
-            rowHeight = max(rowHeight, size.height)
+            rowHeight = max(
+                rowHeight,
+                size.height
+            )
         }
 
         return CGSize(
@@ -162,13 +167,19 @@ private struct BigTopicFlowLayout: Layout {
             }
 
             subview.place(
-                at: CGPoint(x: currentX, y: currentY),
+                at: CGPoint(
+                    x: currentX,
+                    y: currentY
+                ),
                 anchor: .topLeading,
                 proposal: ProposedViewSize(size)
             )
 
             currentX += size.width + spacing
-            rowHeight = max(rowHeight, size.height)
+            rowHeight = max(
+                rowHeight,
+                size.height
+            )
         }
     }
 }

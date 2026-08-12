@@ -37,7 +37,7 @@ struct QRPreferencesChooseView: View {
                 ) {
                     header
 
-                    VStack(spacing: Spacing.md) {
+                    VStack(spacing: Spacing.sm) {
                         ForEach(Topics.groups) { group in
                             BigTopic(
                                 title: group.name,

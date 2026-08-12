@@ -15,6 +15,8 @@ struct AppButton: View {
     var variant: AppButtonVariant = .primary
     var isEnabled: Bool = true
     var accentColor: Color = .accentPrimary
+    var showsBorder: Bool = true
+    var disabledOpacity: Double = 0.45
     let action: () -> Void
 
     var body: some View {
@@ -27,7 +29,7 @@ struct AppButton: View {
                 .background(backgroundColor)
                 .clipShape(RoundedRectangle(cornerRadius: Radius.clickable))
                 .overlay {
-                    if variant == .secondary {
+                    if variant == .secondary && showsBorder {
                         RoundedRectangle(cornerRadius: Radius.clickable)
                             .stroke(Color.border, lineWidth: 1)
                     }
@@ -35,7 +37,7 @@ struct AppButton: View {
         }
         .buttonStyle(.plain)
         .disabled(!isEnabled)
-        .opacity(isEnabled ? 1 : 0.45)
+        .opacity(isEnabled ? 1 : disabledOpacity)
     }
 
     private var foregroundColor: Color {
