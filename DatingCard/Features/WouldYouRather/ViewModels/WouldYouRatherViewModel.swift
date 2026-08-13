@@ -92,10 +92,9 @@ final class WouldYouRatherViewModel: ObservableObject {
             // Baru insert sesi setelah dipastikan ada kartu yang bisa
             // dimainkan, supaya sesi yang benar-benar kosong tidak pernah
             // tersimpan ke history.
-            let dateFormatter = DateFormatter()
-            dateFormatter.locale = Locale(identifier: "id_ID")
-            dateFormatter.dateFormat = "EEEE, dd MMMM yyyy"
-            let sessionTitle = dateFormatter.string(from: Date())
+            let sessionTitle = try nextSessionTitle(
+                in: modelContext
+            )
             let newSession = SessionModel(
                 isContinue: true,
                 title: sessionTitle,
@@ -127,6 +126,35 @@ final class WouldYouRatherViewModel: ObservableObject {
                 "Failed to prepare Would You Rather session: \(error)"
             )
         }
+    }
+
+    private func nextSessionTitle(
+        in modelContext: ModelContext
+    ) throws -> String {
+        let sessions = try modelContext.fetch(
+            FetchDescriptor<SessionModel>()
+        )
+
+        let largestStoryNumber = sessions.compactMap { session -> Int? in
+            let components = session.title.split(separator: " ")
+
+            guard
+                components.count == 2,
+                components[0].lowercased() == "kisah"
+            else {
+                return nil
+            }
+
+            return Int(components[1])
+        }
+        .max() ?? 0
+
+        let nextNumber = max(
+            sessions.count,
+            largestStoryNumber
+        ) + 1
+
+        return "Kisah \(nextNumber)"
     }
 
     func proceedFromShuffling(in modelContext: ModelContext) {
