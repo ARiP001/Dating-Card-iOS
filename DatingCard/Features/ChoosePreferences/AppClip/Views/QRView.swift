@@ -241,7 +241,7 @@ struct QRView: View {
             .multilineTextAlignment(.center)
 
             Text(
-                "Mulai dengan memilih topik yang ingin kalian jelajahi bersama."
+                "Anda bisa pindai kode QR ini melalui kamera handphone kalian untuk memulai permainan"
             )
             .font(AppFont.bodyRegular)
             .foregroundStyle(
