@@ -5,10 +5,13 @@ struct OneByOneShuffleView: View {
     let isReversing: Bool
     var topicIDs: [Int] = Topics.all.map(\.id).shuffled()
 
-    private let cardCount = 8
     private let cardWidth: CGFloat = 132
     private let cardHeight: CGFloat = 186
     private let cornerPadding: CGFloat = 18
+
+    private var pairCount: Int {
+        max((topicIDs.count + 1) / 2, 1)
+    }
 
     var body: some View {
         GeometryReader { geometry in
@@ -16,11 +19,11 @@ struct OneByOneShuffleView: View {
             let height = geometry.size.height
 
             ZStack {
-                ForEach(0..<cardCount, id: \.self) { index in
+                ForEach(0..<pairCount, id: \.self) { index in
                     let hasArrived = shuffleStep > index
                     let isCurrent = shuffleStep == index
 
-                    SingleShuffleCard(topicID: topicID(for: index, offset: 0))
+                    SingleShuffleCard(topicID: topicID(at: index))
                         .offset(
                             x: topCardX(index: index, width: width, hasArrived: hasArrived),
                             y: topCardY(index: index, height: height, hasArrived: hasArrived)
@@ -31,16 +34,22 @@ struct OneByOneShuffleView: View {
                         .zIndex(cardZIndex(index: index, isBottomCard: false))
                         .animation(.spring(response: 0.5, dampingFraction: 0.74), value: shuffleStep)
 
-                    SingleShuffleCard(topicID: topicID(for: index, offset: cardCount))
-                        .offset(
-                            x: bottomCardX(index: index, width: width, hasArrived: hasArrived),
-                            y: bottomCardY(index: index, height: height, hasArrived: hasArrived)
+                    let bottomTopicIndex = index + pairCount
+
+                    if bottomTopicIndex < topicIDs.count {
+                        SingleShuffleCard(
+                            topicID: topicID(at: bottomTopicIndex)
                         )
-                        .rotationEffect(.degrees(bottomRotation(index: index, hasArrived: hasArrived)))
-                        .scaleEffect(isCurrent ? 1.04 : 1)
-                        .opacity(shuffleStep >= index ? 1 : 0)
-                        .zIndex(cardZIndex(index: index, isBottomCard: true))
-                        .animation(.spring(response: 0.55, dampingFraction: 0.76), value: shuffleStep)
+                            .offset(
+                                x: bottomCardX(index: index, width: width, hasArrived: hasArrived),
+                                y: bottomCardY(index: index, height: height, hasArrived: hasArrived)
+                            )
+                            .rotationEffect(.degrees(bottomRotation(index: index, hasArrived: hasArrived)))
+                            .scaleEffect(isCurrent ? 1.04 : 1)
+                            .opacity(shuffleStep >= index ? 1 : 0)
+                            .zIndex(cardZIndex(index: index, isBottomCard: true))
+                            .animation(.spring(response: 0.55, dampingFraction: 0.76), value: shuffleStep)
+                    }
                 }
             }
             .frame(width: width, height: height)
@@ -97,17 +106,17 @@ struct OneByOneShuffleView: View {
 
     private func cardZIndex(index: Int, isBottomCard: Bool) -> Double {
         if isReversing {
-            let reverseBase = Double((cardCount - index) * 2)
+            let reverseBase = Double((pairCount - index) * 2)
             return reverseBase + (isBottomCard ? 1 : 0)
         }
 
         return Double(index * 2 + (isBottomCard ? 1 : 0))
     }
 
-    private func topicID(for index: Int, offset: Int) -> Int {
+    private func topicID(at index: Int) -> Int {
         guard !topicIDs.isEmpty else { return 1 }
 
-        return topicIDs[(index + offset) % topicIDs.count]
+        return topicIDs[index % topicIDs.count]
     }
 }
 

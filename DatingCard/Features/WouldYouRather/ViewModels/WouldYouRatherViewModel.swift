@@ -38,13 +38,13 @@ final class WouldYouRatherViewModel: ObservableObject {
         )
         .sorted()
         self.topicIDs = normalizedTopicIDs
-        self.animationTopicIDs = normalizedTopicIDs.shuffled()
+        self.animationTopicIDs = Topics.all.map(\.id).shuffled()
         self.existingSession = nil
     }
 
     init(session: SessionModel) {
         self.topicIDs = session.selectedTopicIDs
-        self.animationTopicIDs = session.selectedTopicIDs.shuffled()
+        self.animationTopicIDs = Topics.all.map(\.id).shuffled()
         self.existingSession = session
     }
 
@@ -265,7 +265,6 @@ final class WouldYouRatherViewModel: ObservableObject {
             currentPackCards = newCurrentPackCards.shuffled()
         }
 
-        animationTopicIDs = session.currentTopicIDs.shuffled()
         selectedCardID = nil
 
         if pickedPackCards.count == 1, let onlyCard = pickedPackCards.first {

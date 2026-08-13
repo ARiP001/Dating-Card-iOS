@@ -15,8 +15,10 @@ final class CardShufflingViewModel: ObservableObject {
 
     private var shuffleLoopTask: Task<Void, Never>?
 
-    func startLoop() {
+    func startLoop(stepCount: Int) {
         shuffleLoopTask?.cancel()
+
+        let finalStep = max(stepCount, 1)
 
         shuffleLoopTask = Task { [weak self] in
             var step = 0
@@ -28,7 +30,7 @@ final class CardShufflingViewModel: ObservableObject {
                 self.isReversing = direction == -1
                 self.shuffleStep = step
 
-                let delay: UInt64 = step == 8 || step == 0
+                let delay: UInt64 = step == finalStep || step == 0
                     ? 1_000_000_000
                     : 220_000_000
 
@@ -36,8 +38,8 @@ final class CardShufflingViewModel: ObservableObject {
 
                 step += direction
 
-                if step >= 8 {
-                    step = 8
+                if step >= finalStep {
+                    step = finalStep
                     direction = -1
                 } else if step <= 0 {
                     step = 0

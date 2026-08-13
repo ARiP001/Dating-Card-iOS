@@ -102,7 +102,12 @@ struct CardShufflingView: View {
         }
         .toolbar(.hidden, for: .navigationBar)
         .onAppear {
-            viewModel.startLoop()
+            viewModel.startLoop(
+                stepCount: max(
+                    (topicIDs.count + 1) / 2,
+                    1
+                )
+            )
         }
         .onDisappear {
             viewModel.stopLoop()
